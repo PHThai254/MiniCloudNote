@@ -1,0 +1,6 @@
+@MiniCloudNote_API_HostAddress = http://localhost:5265
+
+GET {{MiniCloudNote_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
