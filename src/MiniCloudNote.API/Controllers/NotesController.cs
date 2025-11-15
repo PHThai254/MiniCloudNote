@@ -1,51 +1,59 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniCloudNote.Core.Interfaces; // Thêm 1
+using MiniCloudNote.Infrastructure; // Thêm 2
 
 namespace MiniCloudNote.API.Controllers
 {
-    // Dữ liệu giả lập để tạo Ghi chú
+    // Dữ liệu giả lập (Giữ nguyên)
     public class CreateNoteRequest
     {
-        public string? Title { get; set; }
-        public string? Content { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
     }
 
     [ApiController]
     [Route("api/[controller]")]
     public class NotesController : ControllerBase
     {
+        // 1. Khai báo các dịch vụ (trách nhiệm đã tách)
+        private readonly INoteService _noteService;
+        private readonly NoteRepository _noteRepository; // Tạm thời dùng class, bài DIP sẽ dùng Interface
+        private readonly EmailService _emailService;     // Tạm thời dùng class
+
+        // 2. Tiêm (Inject) dịch vụ vào qua Constructor
+        public NotesController(INoteService noteService, NoteRepository noteRepository, EmailService emailService)
+        {
+            _noteService = noteService;
+            _noteRepository = noteRepository;
+            _emailService = emailService;
+        }
+
         [HttpPost]
         public IActionResult CreateNote([FromBody] CreateNoteRequest request)
         {
-            // === VI PHẠM 1: Trách nhiệm xử lý Nghiệp vụ (Business Logic) ===
-            // Logic nghiệp vụ: Tiêu đề không được để trống
-            if (string.IsNullOrWhiteSpace(request.Title))
+            try
             {
-                return BadRequest("Tiêu đề là bắt buộc.");
+                // === Controller chỉ còn 1 trách nhiệm: ĐIỀU PHỐI ===
+
+                // 1. Gọi Service để check Nghiệp vụ
+                _noteService.CreateNote(request.Title, request.Content);
+
+                // 2. Gọi Repo để lưu
+                _noteRepository.Save(request.Title, request.Content);
+
+                // 3. Gọi Email để gửi
+                _emailService.SendEmail(request.Title);
+
+                return Ok("Tạo ghi chú thành công!");
             }
-            // Logic nghiệp vụ: Nội dung không được quá 1000 ký tự
-            if (request.Content?.Length > 1000)
+            catch (ArgumentException ex) // Bắt lỗi nghiệp vụ
             {
-                return BadRequest("Nội dung quá dài.");
+                return BadRequest(ex.Message);
             }
-            // === KẾT THÚC VI PHẠM 1 ===
-            // === VI PHẠM 2: Trách nhiệm truy cập Database (Data Access) ===
-            // Giả lập lưu vào Database
-            Console.WriteLine("Đang kết nối tới PostgreSQL...");
-            Console.WriteLine($"Đã lưu: Title = {request.Title}, Content = {request.Content}");
-            // Giả sử đây là một câu lệnh SQL phức tạp
-            // var connection = new NpgsqlConnection("...");
-            // connection.Execute("INSERT INTO ...");
-            // === KẾT THÚC VI PHẠM 2 ===
-
-            // === VI PHẠM 3: Trách nhiệm gọi Dịch vụ ngoài (External Service) ===
-            // Giả lập gửi email thông báo
-            Console.WriteLine("Đang kết nối tới dịch vụ Email...");
-            Console.WriteLine($"Gửi email tới người dùng: 'Bạn vừa tạo ghi chú {request.Title}'");
-            // var smtpClient = new SmtpClient("...");
-            // smtpClient.Send("...");
-
-            return Ok("Tạo ghi chú thành công!");
-            // === KẾT THÚC VI PHẠM 3 ===
+            catch (Exception ex) // Bắt lỗi hệ thống
+            {
+                return StatusCode(500, "Lỗi hệ thống: " + ex.Message);
+            }
         }
     }
 }

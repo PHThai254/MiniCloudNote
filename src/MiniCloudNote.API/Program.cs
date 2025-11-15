@@ -24,6 +24,11 @@ builder.Services.AddSwaggerGen(c =>
 // Thêm Controller (nếu bạn có controller)
 builder.Services.AddControllers();
 
+// Đăng ký các dịch vụ SRP của chúng ta
+builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.INoteService, MiniCloudNote.Core.Services.NoteService>();
+builder.Services.AddScoped<MiniCloudNote.Infrastructure.NoteRepository>();
+builder.Services.AddScoped<MiniCloudNote.Infrastructure.EmailService>();
+
 var app = builder.Build();
 
 // ----------------------
