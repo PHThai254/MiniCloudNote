@@ -10,4 +10,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MiniCloudNote.Core\MiniCloudNote.Core.csproj" />
+    <ProjectReference Include="..\MiniCloudNote.Infrastructure\MiniCloudNote.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
