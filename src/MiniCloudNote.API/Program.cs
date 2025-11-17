@@ -29,6 +29,14 @@ builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.INoteService, MiniCloud
 builder.Services.AddScoped<MiniCloudNote.Infrastructure.NoteRepository>();
 builder.Services.AddScoped<MiniCloudNote.Infrastructure.EmailService>();
 
+// === THÊM CODE OCP ===
+// Đăng ký tất cả các class thực thi IFormatStrategy ở đây
+builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.MarkdownFormattingStrategy>();
+builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.PlainTextFormattingStrategy>();
+builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.HtmlFormattingStrategy>();
+
+// === KẾT THÚC CODE OCP === //
+
 var app = builder.Build();
 
 // ----------------------

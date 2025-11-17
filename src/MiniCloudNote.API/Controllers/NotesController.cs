@@ -4,11 +4,17 @@ using MiniCloudNote.Infrastructure; // Thêm 2
 
 namespace MiniCloudNote.API.Controllers
 {
-    // Dữ liệu giả lập (Giữ nguyên)
+    // Thêm class DTO: Dữ liệu giả lập để nhận request
     public class CreateNoteRequest
     {
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
+    }
+    // Thêm class DTO: Hàm định dạng dữ liệu để nhận request
+    public class FormatNoteRequest
+    {
+        public string Content { get; set; } = string.Empty;
+        public string FormatType { get; set; } = string.Empty; // e.g., "Markdown", "PlainText"
     }
 
     [ApiController]
@@ -54,6 +60,13 @@ namespace MiniCloudNote.API.Controllers
             {
                 return StatusCode(500, "Lỗi hệ thống: " + ex.Message);
             }
+        }
+        [HttpPost("format")]
+        public IActionResult FormatNote([FromBody] FormatNoteRequest request)
+        {
+            // Controller gọi Service (tuân thủ SRP)
+            var formattedContent = _noteService.FormatNoteContent(request.Content, request.FormatType);
+            return Ok(formattedContent);
         }
     }
 }
