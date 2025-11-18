@@ -1,12 +1,19 @@
+using MiniCloudNote.Core.Entities; // Phải có
+using MiniCloudNote.Core.Interfaces;
+using System.Threading.Tasks;       // Phải có
+
 namespace MiniCloudNote.Infrastructure
 {
-    public class NoteRepository // Sẽ implement INoteRepository ở bài DIP
+    public class NoteRepository
     {
-        public void Save(string title, string content)
+        public async Task<Note> SaveAsync(Note note)
         {
-            // === TRÁCH NHIỆM 2: Database (đã chuyển về đây) ===
-            Console.WriteLine("Đang kết nối tới PostgreSQL...");
-            Console.WriteLine($"Đã lưu: Title = {title}, Content = {content}");
+            Console.WriteLine("Đang kết nối tới PostgreSQL (Async)...");
+            Console.WriteLine($"Đã lưu: Title = {note.Title}, ID = {note.Id}");
+
+            await Task.Delay(10); 
+
+            return note;
         }
     }
 }

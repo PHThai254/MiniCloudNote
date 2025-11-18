@@ -1,24 +1,32 @@
+using MiniCloudNote.Core.Entities; 
 using MiniCloudNote.Core.Interfaces;
+using MiniCloudNote.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks; 
 
 namespace MiniCloudNote.Core.Services
 {
     public class NoteService : INoteService
     {
         // === BẮT ĐẦU CODE OCP === //
-        // 1.Service không tự tạo, mà yêu cầu "tiêm" vào 1 danh sách chiến lược
+        // Service không tự tạo, mà yêu cầu "tiêm" vào 1 danh sách chiến lược
         private readonly IEnumerable<IFormattingStrategy> _formattingStrategies;
+
+        // === TIÊM REPOSITORY (SRP/DIP) === //
+        private readonly NoteRepository _noteRepository; // Tạm thời dùng class, bài DIP sẽ dùng Interface
         
-        // 2.Sửa Constructor (Hàm khởi tạo)
-        public NoteService(IEnumerable<IFormattingStrategy> formattingStrategies)
+        // Sửa Constructor (Hàm khởi tạo) để nhận 2 thứ
+        public NoteService(IEnumerable<IFormattingStrategy> formattingStrategies, NoteRepository noteRepository)
         {
             _formattingStrategies = formattingStrategies;
+            _noteRepository = noteRepository;
         }
 
-        public bool CreateNote(string title, string content)
+        // === TRIỂN KHAI HÀM MỚI ===
+        public async Task<Note> CreateNoteAsync(string title, string content)
         {
-            // === TRÁCH NHIỆM 1: Nghiệp vụ (đã chuyển về đây) ===
+            // 1. Trách nhiệm Nghiệp vụ (Validate)
             if (string.IsNullOrEmpty(title))
             {
                 throw new ArgumentException("Tiêu đề là bắt buộc.");
@@ -28,10 +36,29 @@ namespace MiniCloudNote.Core.Services
                 throw new ArgumentException("Nội dung quá dài.");
             }
 
+            // 2. Tạo Entity
+#pragma warning disable CS8601 // Possible null reference assignment.
+            var newNote = new Note
+            {
+                Id = Guid.NewGuid(),
+                Title = title,
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+#pragma warning restore CS8601 // Possible null reference assignment.
+
             // TODO: Gọi Repository để lưu
+            //_noteRepository.Save(newNote);
+            // 3. Gọi Repository để lưu (Vẫn là giả lập)
+            // Dùng await vì hàm là Async
+            var createdNote = await _noteRepository.SaveAsync(newNote); 
+
             // TODO: Gọi EmailService để gửi
 
-            return true;
+            // 4. Gọi Email (Tạm thời bỏ qua)
+            // _emailService.SendEmail(createdNote.Title);
+            return createdNote;
         }
 
         // === SỬA LẠI HOÀN TOÀN HÀM NÀY THEO OCP === //
