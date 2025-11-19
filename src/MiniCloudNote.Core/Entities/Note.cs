@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations; // Cần cho [Key]
+using MiniCloudNote.Core.Interfaces; 
 
 namespace MiniCloudNote.Core.Entities
 {
-    public class Note
+    // Note thực thi IEditableNote (có thể đọc và ghi)
+    public class Note : IEditableNote
     {
         [Key] // Đánh dấu đây là khóa chính
         public Guid Id { get; set; } // Dùng Guid để ID là duy nhất trên toàn hệ thống

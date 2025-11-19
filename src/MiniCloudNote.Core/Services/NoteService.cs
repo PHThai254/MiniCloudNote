@@ -75,6 +75,17 @@ namespace MiniCloudNote.Core.Services
             
             // 5. Nếu không tìm thấy chiến lược nào
             throw new NotSupportedException($"Định dạng '{formatType}' không được hỗ trợ.");    
+
         } 
+
+        // Hàm này CHỈ chấp nhận IReadOnlyNote
+        // Dù bạn truyền Note (Entity) vào, hàm này cũng chỉ nhìn thấy phần "Read"
+        public string GeneratePreview(IReadOnlyNote note)
+        {
+            // note.Title = "Sửa bậy"; // --> LỖI BIÊN DỊCH NGAY LẬP TỨC!
+            // C# sẽ gạch đỏ dòng trên vì IReadOnlyNote không có setter.
+            
+            return $"Preview: {note.Title} - {note.CreatedAt}";
+        }
     }
 }
