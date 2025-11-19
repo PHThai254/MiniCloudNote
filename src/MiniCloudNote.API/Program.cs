@@ -1,86 +1,42 @@
-using Microsoft.OpenApi.Models;
-using System;
+using MiniCloudNote.Core.Interfaces;
+using MiniCloudNote.Core.Services;
+using MiniCloudNote.Core.Services.FormattingStrategies;
+using MiniCloudNote.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ----------------------
-// Services
-// ----------------------
-
-// Minimal API explorer (cho Swagger hiểu endpoint)
-builder.Services.AddEndpointsApiExplorer();
-
-// Thêm Swagger service
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "MiniCloudNote API",
-        Version = "v1",
-        Description = "API cho dự án MiniCloudNote"
-    });
-});
-
-// Thêm Controller (nếu bạn có controller)
+// Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Đăng ký các dịch vụ SRP của chúng ta
-builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.INoteService, MiniCloudNote.Core.Services.NoteService>();
-builder.Services.AddScoped<MiniCloudNote.Infrastructure.NoteRepository>();
-builder.Services.AddScoped<MiniCloudNote.Infrastructure.EmailService>();
+// === ĐĂNG KÝ SERVICE CỦA MÌNH (DI) ===
+builder.Services.AddScoped<IFormattingStrategy, MarkdownFormattingStrategy>();
+builder.Services.AddScoped<IFormattingStrategy, PlainTextFormattingStrategy>();
 
-// === THÊM CODE OCP ===
-// Đăng ký tất cả các class thực thi IFormatStrategy ở đây
-builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.MarkdownFormattingStrategy>();
-builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.PlainTextFormattingStrategy>();
-builder.Services.AddScoped<MiniCloudNote.Core.Interfaces.IFormattingStrategy, MiniCloudNote.Core.Services.FormattingStrategies.HtmlFormattingStrategy>();
+// Đăng ký NoteService
+builder.Services.AddScoped<INoteService, NoteService>();
 
-// === KẾT THÚC CODE OCP === //
+// Đăng ký Repository (DIP - Interface map với Class)
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+
+// Đăng ký EmailService (Tạm thời)
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
-// ----------------------
-// Middleware pipeline
-// ----------------------
-
-// Chỉ bật Swagger trong Development
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();       // tạo JSON swagger
-    app.UseSwaggerUI();     // hiển thị UI tại /swagger
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-// ----------------------
-// Minimal API example
-// ----------------------
+app.UseAuthorization();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast(
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        )).ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-// Map các controller nếu có
+// Kích hoạt các Controller (NotesController)
 app.MapControllers();
-app.Run();
 
-// ----------------------
-// Record mẫu cho Minimal API
-// ----------------------
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run();

@@ -4,7 +4,8 @@ using System.Threading.Tasks;       // Phải có
 
 namespace MiniCloudNote.Infrastructure
 {
-    public class NoteRepository
+    // Thêm ": INoteRepository" để triển khai interface
+    public class NoteRepository : INoteRepository
     {
         public async Task<Note> SaveAsync(Note note)
         {

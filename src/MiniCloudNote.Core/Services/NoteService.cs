@@ -1,6 +1,5 @@
 using MiniCloudNote.Core.Entities; 
 using MiniCloudNote.Core.Interfaces;
-using MiniCloudNote.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks; 
@@ -14,10 +13,10 @@ namespace MiniCloudNote.Core.Services
         private readonly IEnumerable<IFormattingStrategy> _formattingStrategies;
 
         // === TIÊM REPOSITORY (SRP/DIP) === //
-        private readonly NoteRepository _noteRepository; // Tạm thời dùng class, bài DIP sẽ dùng Interface
+        private readonly INoteRepository _noteRepository; 
         
         // Sửa Constructor (Hàm khởi tạo) để nhận 2 thứ
-        public NoteService(IEnumerable<IFormattingStrategy> formattingStrategies, NoteRepository noteRepository)
+        public NoteService(IEnumerable<IFormattingStrategy> formattingStrategies, INoteRepository noteRepository)
         {
             _formattingStrategies = formattingStrategies;
             _noteRepository = noteRepository;
