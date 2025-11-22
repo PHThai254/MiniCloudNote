@@ -60,7 +60,49 @@ namespace MiniCloudNote.Core.Services
             return createdNote;
         }
 
-        // === SỬA LẠI HOÀN TOÀN HÀM NÀY THEO OCP === //
+        // 1. Lấy tất cả ghi chú
+        public async Task<IEnumerable<Note>> GetAllNotesAsync()
+        {
+            return await _noteRepository.GetAllAsync();
+        }
+        // 2. Lấy theo ID
+        public async Task<Note?> GetNoteByIdAsync(Guid id)
+        {
+            return await _noteRepository.GetByIdAsync(id);
+        }
+
+        // 3. Cập nhật (QUAN TRỌNG: Tư duy Tìm --> Sửa --> Lưu)
+        public async Task UpdateNoteAsync(Guid id, string title, string content)
+        {
+            // Bước 1: Tìm note cũ theo ID (cũng như tìm món đồ cũ trong kho)
+            var existingNote = await _noteRepository.GetByIdAsync(id);
+            if (existingNote == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy ghi chú để sửa.");
+            }
+
+            // Bước 2: Sửa content trên note đó (Modify) (Cũng như sửa thông tin trên món đồ đó)
+            existingNote.Title = title;
+            existingNote.Content = content;
+            existingNote.UpdatedAt = DateTime.UtcNow; // Cập nhật thời gian sửa
+
+            // Bước 3: Lưu lại note đó (Cũng như bảo thủ kho cất lại)
+            await _noteRepository.UpdateAsync(existingNote);   
+        }
+
+        // 4. Xóa (Tư duy tìm -> Xóa)
+        public async Task DeleteNoteAsync(Guid id)
+        {
+            // Bước 1: Phải tìm thấy mới xóa được
+            var existingNote = await _noteRepository.GetByIdAsync(id);
+            if (existingNote == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy ghi chú để xóa.");
+            }
+
+            // Bước 2: Xóa
+            await _noteRepository.DeleteAsync(existingNote);    
+        }
         public string FormatNoteContent(string content, string formatType)
         {
             // 3. Tìm chiến lược phù hợp trong danh sách
@@ -82,8 +124,7 @@ namespace MiniCloudNote.Core.Services
         public string GeneratePreview(IReadOnlyNote note)
         {
             // note.Title = "Sửa bậy"; // --> LỖI BIÊN DỊCH NGAY LẬP TỨC!
-            // C# sẽ gạch đỏ dòng trên vì IReadOnlyNote không có setter.
-            
+            // C# sẽ gạch đỏ dòng trên vì IReadOnlyNote không có setter.    
             return $"Preview: {note.Title} - {note.CreatedAt}";
         }
     }

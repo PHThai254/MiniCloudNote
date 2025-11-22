@@ -44,9 +44,8 @@ namespace MiniCloudNote.API.Controllers
                     CreatedAt = newNoteEntity.CreatedAt
                 };
 
-                // 3. Trả về 201 Created (chuẩn REST)
-                // CreatedAtAction sẽ trả về URL của tài nguyên mới trong Header
-                return CreatedAtAction(nameof(GetNoteById), new { id = responseDto.Id }, responseDto);
+                // 3. Đổi GetNoteById thành GetById (Tên của hàm GET ở dưới)
+                return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
                 
             }
             catch (ArgumentException ex) // Bắt lỗi nghiệp vụ
@@ -59,11 +58,51 @@ namespace MiniCloudNote.API.Controllers
             }
         }
 
-        // Hàm giả lập cho CreatedAtAction
-        [HttpGet("{id}")]
-        public IActionResult GetNoteById(Guid id)
+        // 1. GET: api/Notes (Lấy danh sách)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return Ok($"Đang lấy note {id}");
+            var notes = await _noteService.GetAllNotesAsync();
+            return Ok(notes);
+        }
+
+        // 2. GET: api/Notes/{id} (Lấy 1 cái)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var note = await _noteService.GetNoteByIdAsync(id);
+            if (note == null) return NotFound("Không tìm thấy ghi chú.");
+            return Ok(note);
+        }
+
+        // 3. PUT: api/Notes/{id} (Sửa)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateNoteRequest request)
+        {
+            try 
+            {
+                await _noteService.UpdateNoteAsync(id, request.Title, request.Content);
+                return NoContent(); // 204 No Content (Chuẩn khi update thành công)
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Không tìm thấy ghi chú để sửa.");
+            }
+        }
+
+        // 4. DELETE: api/Notes/{id} (Xóa)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _noteService.DeleteNoteAsync(id);
+                return NoContent(); // 204 No Content
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Không tìm thấy ghi chú để xóa.");
+            }
         }
         
         [HttpPost("format")]
