@@ -4,6 +4,7 @@ using MiniCloudNote.Infrastructure;
 using MiniCloudNote.API.DTOs; 
 using MiniCloudNote.Core.Entities; //Thêm Entity (để Mapping)
 using System.Threading.Tasks; // Thêm Async
+using Microsoft.Extensions.Configuration;
 
 namespace MiniCloudNote.API.Controllers
 {
@@ -13,14 +14,16 @@ namespace MiniCloudNote.API.Controllers
     {
         // 1. Khai báo các dịch vụ (trách nhiệm đã tách)
         private readonly INoteService _noteService;
+        private readonly IConfiguration _configuration;
         // Bỏ Repository và Email, Controller không cần biết chúng (SRP)
         //private readonly NoteRepository _noteRepository; // Tạm thời dùng class, bài DIP sẽ dùng Interface
         //private readonly EmailService _emailService;     // Tạm thời dùng class
 
         // 2. Tiêm (Inject) dịch vụ vào qua Constructor
-        public NotesController(INoteService noteService)
+        public NotesController(INoteService noteService, IConfiguration configuration)
         {
             _noteService = noteService;
+            _configuration = configuration;
           
         }
 
@@ -111,6 +114,23 @@ namespace MiniCloudNote.API.Controllers
             // Controller gọi Service (tuân thủ SRP)
             var formattedContent = _noteService.FormatNoteContent(request.Content, request.FormatType);
             return Ok(formattedContent);
+        }
+
+        // 4. Thêm API kiểm tra cấu hình (Test nhanh)
+        [HttpGet("config-test")]
+        public IActionResult GetConfig()
+        {
+            // Đọc giá trị "MyName" từ file json
+            var myName = _configuration["MyName"];
+
+            // Đọc chuỗi kết nối (để xem nó có lấy đúng từ User Secrets không)
+            var connStr = _configuration.GetConnectionString("DefaultConnection");
+
+            return Ok(new
+            {
+                EnvironmentName = myName,
+                ConnectionString = connStr
+            });
         }
     }
 }
