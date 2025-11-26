@@ -29,6 +29,10 @@ builder.Services.AddScoped<INoteRepository, NoteRepository>();
 // Đăng ký EmailService (Tạm thời)
 builder.Services.AddScoped<EmailService>();
 
+// Đăng ký Authentication Services (Ngày 12)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MiniCloudNote.Core.Entities;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace MiniCloudNote.Infrastructure.Data
 {
@@ -12,5 +13,7 @@ namespace MiniCloudNote.Infrastructure.Data
         }
         // Khai báo bảng Notes. Tên biến 'Notes' sẽ là tên bảng trong PostgreSQL
         public DbSet<Note> Notes { get; set; }
+        // Thêm dòng này vào trong class
+        public DbSet<User> Users { get; set; }
     }
 }

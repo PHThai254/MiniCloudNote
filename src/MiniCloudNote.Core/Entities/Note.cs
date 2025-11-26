@@ -18,5 +18,6 @@ namespace MiniCloudNote.Core.Entities
         public DateTime? UpdatedAt { get; set; } // Thời gian cập nhật ghi chú, có thể null
 
         // TODO: Sẽ thêm UserId ở đây khi làm về Auth
+        
     }
 }
