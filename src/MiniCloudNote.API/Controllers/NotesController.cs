@@ -5,11 +5,13 @@ using MiniCloudNote.API.DTOs;
 using MiniCloudNote.Core.Entities; //Thêm Entity (để Mapping)
 using System.Threading.Tasks; // Thêm Async
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MiniCloudNote.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // <--- Dán cái bùa này vào là khóa toàn bộ API trong Controller này
     public class NotesController : ControllerBase
     {
         // 1. Khai báo các dịch vụ (trách nhiệm đã tách)
