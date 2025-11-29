@@ -1,0 +1,47 @@
+# Phiên bản cú pháp của Docker Compose
+version: '3.8'
+
+# Định nghĩa các Nhạc công (Services)
+services:
+
+  # 1. Nhạc công Database (PostgreSQL)
+  db:
+    image: postgres:16-alpine
+    container_name: minicloud-db-compose
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: minicloudnote
+    ports:
+      - "5432:5432"
+    # Quan trọng: Tạo ổ cứng bền vững để không mất dữ liệu khi tắt
+    volumes:
+      # Để Docker tự quản lý volume (An toàn nhất trên WSL)
+      - postgres_data:/var/lib/postgresql/data 
+    restart: always
+  
+  # 2. Nhạc công API (Backend .NET)
+  api:
+    container_name: minicloud-api-compose
+    # Thay vì dùng image có sẵn, ta bảo nó: "Hãy tự Build từ Dockerfile ở thư mục này"
+    build:
+      context: .
+      dockerfile: src/MiniCloudNote.API/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # MAGIC HAPPENS HERE: Host=db
+      # Thay vì localhost hay host.docker.internal, ta dùng tên service "db"
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=minicloudnote;Username=admin;Password=admin
+      - Jwt__Key=DayLaChuoiBiMatSieuDaiKhongAiDoanDuoc123456789@
+      - Jwt__Issuer=MiniCloudNote
+      - Jwt__Audience=MiniCloudNoteUser
+    # API phải đợi DB chạy xong mới được chạy
+    depends_on:
+      - db
+    restart: on-failure
+
+# Khai báo volume ở cuối file
+volumes:
+  postgres_data:
