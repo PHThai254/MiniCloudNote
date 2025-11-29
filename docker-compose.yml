@@ -1,6 +1,11 @@
 # Phiên bản cú pháp của Docker Compose
 version: '3.8'
 
+# Định nghĩa mạng nội bộ (Phòng họp kín)
+networks:
+  minicloud-network:
+    driver: bridge
+
 # Định nghĩa các Nhạc công (Services)
 services:
 
@@ -9,15 +14,18 @@ services:
     image: postgres:16-alpine
     container_name: minicloud-db-compose
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: minicloudnote
+      # Đọc từ file .env (${TEN_BIEN})
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     # Quan trọng: Tạo ổ cứng bền vững để không mất dữ liệu khi tắt
     volumes:
       # Để Docker tự quản lý volume (An toàn nhất trên WSL)
       - postgres_data:/var/lib/postgresql/data 
+    networks:
+      - minicloud-network # Cho vào phòng họp
     restart: always
   
   # 2. Nhạc công API (Backend .NET)
@@ -33,13 +41,15 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       # MAGIC HAPPENS HERE: Host=db
       # Thay vì localhost hay host.docker.internal, ta dùng tên service "db"
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=minicloudnote;Username=admin;Password=admin
-      - Jwt__Key=DayLaChuoiBiMatSieuDaiKhongAiDoanDuoc123456789@
-      - Jwt__Issuer=MiniCloudNote
-      - Jwt__Audience=MiniCloudNoteUser
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
     # API phải đợi DB chạy xong mới được chạy
     depends_on:
       - db
+    networks:
+      - minicloud-network # Cho vào phòng họp cùng DB
     restart: on-failure
 
 # Khai báo volume ở cuối file
