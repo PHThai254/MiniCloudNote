@@ -18,6 +18,13 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+
+    healthcheck:
+      # Lệnh kiểm tra: "Này Postgres, mày sẵn sàng chưa?"
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s        # Cứ 5 giây hỏi 1 lần
+      timeout: 5s         # Chờ trả lời tối đa 5 giây
+      retries: 5          # Thử 5 lần không được mới báo là "Unhealthy" (Ốm)
     ports:
       - "5432:5432"
     # Quan trọng: Tạo ổ cứng bền vững để không mất dữ liệu khi tắt
@@ -30,7 +37,7 @@ services:
   
   # 2. Nhạc công API (Backend .NET)
   api:
-    container_name: minicloud-api-compose
+    # container_name: minicloud-api-compose
     # Thay vì dùng image có sẵn, ta bảo nó: "Hãy tự Build từ Dockerfile ở thư mục này"
     build:
       context: .
@@ -47,10 +54,11 @@ services:
       - Jwt__Audience=${JWT_AUDIENCE}
     # API phải đợi DB chạy xong mới được chạy
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Chỉ khi DB khỏe mạnh mới cho API chạy
     networks:
       - minicloud-network # Cho vào phòng họp cùng DB
-    restart: on-failure
+    restart: always # Đổi từ on-failure sang always cho "trâu bò" hơn
 
 # Khai báo volume ở cuối file
 volumes:
