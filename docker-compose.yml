@@ -41,7 +41,7 @@ services:
     # Thay vì dùng image có sẵn, ta bảo nó: "Hãy tự Build từ Dockerfile ở thư mục này"
     build:
       context: .
-      dockerfile: src/MiniCloudNote.API/Dockerfile
+      dockerfile: src/MiniCloudNote.API/Dockerfile.dev
     ports:
       - "8080:8080"
     environment:
@@ -52,6 +52,9 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
+
+    volumes:
+      - .:/app # Mount thư mục hiện tại vào /app trong container  
     # API phải đợi DB chạy xong mới được chạy
     depends_on:
       db:

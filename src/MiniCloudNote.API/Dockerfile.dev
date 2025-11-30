@@ -1,0 +1,13 @@
+# Dùng ảnh SDK (chứa đầy đủ công cụ) thay vì ảnh Runtime
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# Mở cổng 8080
+EXPOSE 8080
+
+# Lệnh chạy mặc định: dotnet watch
+# Nó sẽ theo dõi file .csproj và tự động chạy lại khi code thay đổi
+# --urls: Chỉ định chạy trên mọi IP (0.0.0.0) để Docker map được ra ngoài
+ENTRYPOINT ["dotnet", "watch", "run", "--project", "src/MiniCloudNote.API/MiniCloudNote.API.csproj", "--urls", "http://0.0.0.0:8080"]

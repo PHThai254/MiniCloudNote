@@ -67,6 +67,7 @@ namespace MiniCloudNote.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            Console.WriteLine("--- TEST HOT RELOAD ---");
             var notes = await _noteService.GetAllNotesAsync();
             return Ok(notes);
         }
