@@ -10,7 +10,7 @@ services:
   # 1. Nhạc công Database (PostgreSQL)
   db:
     image: postgres:16-alpine
-    container_name: minicloud-db-compose
+    # container_name: minicloud-db-compose
     environment:
       # Đọc từ file .env (${TEN_BIEN})
       POSTGRES_USER: ${DB_USER}

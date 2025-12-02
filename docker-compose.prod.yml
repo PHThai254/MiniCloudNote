@@ -1,0 +1,25 @@
+
+services:
+  # Database cho Prod (Thực tế sẽ dùng DB riêng, nhưng ở đây ta dùng chung image cho tiện)
+  db:
+    restart: always
+    # Ở Prod, ta KHÔNG mở cổng 5432 ra ngoài máy thật để bảo mật
+    # Chỉ các container trong mạng nội bộ mới gọi được nhau
+    # ports: 
+    #   - "5432:5432"  <-- Comment dòng này lại
+
+  api:
+    # container_name: minicloud-api-prod
+    build:
+      context: .
+      dockerfile: src/MiniCloudNote.API/Dockerfile # <--- Dùng file Dockerfile GỐC (Multi-stage, siêu nhẹ)
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production # <--- Chế độ Chạy thật
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+    ports:
+      - "9090:8080" # Mở cổng 9090 (để không đụng hàng với cổng 8080 của Dev)
+    # KHÔNG map volume code (.:/app) -> Code được đóng gói cứng trong Image
+    restart: always
