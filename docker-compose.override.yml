@@ -1,0 +1,24 @@
+
+services:
+  # Chúng ta chỉ cần ghi đè những chỗ cần thiết
+  db:
+    ports: 
+      - "5432:5432" # Chỉ lúc Dev mới cần mở cổng DB ra ngoài để soi bằng DBeaver
+  
+  api:
+    # Thay vì dùng image có sẵn, ta bảo nó: "Hãy tự Build từ Dockerfile ở thư mục này"
+    build:
+      context: .
+      dockerfile: src/MiniCloudNote.API/Dockerfile.dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # MAGIC HAPPENS HERE: Host=db
+      # Thay vì localhost hay host.docker.internal, ta dùng tên service "db"
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+    ports:
+      - "8080:8080" # Mở cổng API để Swagger chạy
+    volumes:
+      - .:/app # Cửa sổ thần kỳ (Hot Reload)

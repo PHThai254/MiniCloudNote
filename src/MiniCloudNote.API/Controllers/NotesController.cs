@@ -131,7 +131,7 @@ namespace MiniCloudNote.API.Controllers
 
             return Ok(new
             {
-                EnvironmentName = myName,
+                EnvironmentName = myName + " - Test Override Day 19", 
                 ConnectionString = connStr
             });
         }
