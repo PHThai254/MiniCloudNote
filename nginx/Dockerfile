@@ -6,3 +6,8 @@ RUN rm /etc/nginx/conf.d/default.conf
 
 # 3. Copy file cấu hình của mình vào đúng chỗ
 COPY nginx.conf /etc/nginx/nginx.conf
+
+# COPY THƯ MỤC CHỨA CHÌA KHÓA VÀO CONTAINER
+COPY certs /etc/nginx/certs
+
+

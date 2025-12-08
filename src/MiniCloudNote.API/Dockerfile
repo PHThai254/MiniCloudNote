@@ -1,6 +1,6 @@
 # === GIAI ĐOẠN 1: CHẾ BIẾN (BUILD STAGE) ===
 # Dùng ảnh chứa đầy đủ công cụ (SDK) để biên dịch code
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS BUILD
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # 1. Copy các file dự án (.csproj) vào trước để restore (Tối ưu cache)

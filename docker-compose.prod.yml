@@ -3,13 +3,12 @@ services:
   nginx:
     # image: nginx:alpine
     container_name: minicloud-nginx
-
     build:
       context: ./nginx
       dockerfile: Dockerfile
-      
     ports:
-      - "80:80" # Chỉ mở duy nhất cổng 80 ra ngoài thế giới
+      - "80:80" # Cổng HTTP cũ (để chuyển hướng)
+      - "443:443" # Cổng HTTPS mới (Mở thêm cái này)
     depends_on:
       - api
     networks:
