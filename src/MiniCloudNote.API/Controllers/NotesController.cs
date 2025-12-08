@@ -135,5 +135,19 @@ namespace MiniCloudNote.API.Controllers
                 ConnectionString = connStr
             });
         }
+
+        // 5. Thêm API trả vể tên server (Test nhanh)
+        [HttpGet("who-am-i")]
+        [AllowAnonymous] // Cho phép ai cũng gọi được để test cho nhanh
+        public IActionResult WhoAmI()
+        {
+            // Lấy tên máy (Trong Docker nó là Container ID)
+            var serverName = Environment.MachineName;
+    
+            return Ok(new { 
+                Message = "Xin chào! Tôi là nhân viên phục vụ bạn.",
+                ServerId = serverName 
+            });
+        }
     }
 }

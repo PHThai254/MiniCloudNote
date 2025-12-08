@@ -33,7 +33,7 @@ services:
   
   # 2. Nhạc công API (Backend .NET)
   api:
-    container_name: minicloud-api-compose
+    # container_name: minicloud-api-compose
     # Ở file gốc, ta chưa nói Build bằng cách nào, cũng chưa mở Port
 
     # API phải đợi DB chạy xong mới được chạy
