@@ -1,5 +1,21 @@
 
 services:
+  nginx:
+    # image: nginx:alpine
+    container_name: minicloud-nginx
+
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      
+    ports:
+      - "80:80" # Chỉ mở duy nhất cổng 80 ra ngoài thế giới
+    depends_on:
+      - api
+    networks:
+      - minicloud-network # Chung phòng họp với API
+    restart: always
+
   # Database cho Prod (Thực tế sẽ dùng DB riêng, nhưng ở đây ta dùng chung image cho tiện)
   db:
     restart: always
@@ -19,7 +35,11 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
-    ports:
-      - "9090:8080" # Mở cổng 9090 (để không đụng hàng với cổng 8080 của Dev)
+    #ports:
+    # - "9090:8080" # Mở cổng 9090 (để không đụng hàng với cổng 8080 của Dev)
     # KHÔNG map volume code (.:/app) -> Code được đóng gói cứng trong Image
+
+    expose: 
+      - "8080" # Chỉ mở hé cho NGINX (cùng mạng) nhìn thấy
+    
     restart: always

@@ -101,6 +101,27 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+// === BẮT ĐẦU: TỰ ĐỘNG MIGRATION ===
+// Tạo một phạm vi (scope) tạm thời để lấy DbContext ra dùng
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        
+        // Lệnh này tương đương với 'dotnet ef database update'
+        // Nó sẽ tự tạo Database nếu chưa có, và chạy các migration còn thiếu
+        context.Database.Migrate();
+        
+        Console.WriteLine("--> Đã thực hiện Migration Database thành công!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("--> Lỗi khi Migration: " + ex.Message);
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
