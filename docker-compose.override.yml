@@ -22,3 +22,8 @@ services:
       - "8080:8080" # Mở cổng API để Swagger chạy
     volumes:
       - .:/app # Cửa sổ thần kỳ (Hot Reload)
+    
+  minio:
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console web UI

@@ -44,6 +44,21 @@ services:
       - minicloud-network # Cho vào phòng họp cùng DB
     restart: always # Đổi từ on-failure sang always cho "trâu bò" hơn
 
+  # 3. Nhạc công MinIO (Lưu trữ tệp)
+  minio:
+    image: minio/minio:latest
+    container_name: minicloud-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data # Tạo volume để lưu trữ dữ liệu
+    networks:
+      - minicloud-network
+    restart: always
+
 # Khai báo volume ở cuối file
 volumes:
   postgres_data:
+  minio_data: # Tạo volume cho MinIO

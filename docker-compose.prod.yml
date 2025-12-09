@@ -40,5 +40,4 @@ services:
 
     expose: 
       - "8080" # Chỉ mở hé cho NGINX (cùng mạng) nhìn thấy
-    
     restart: always
