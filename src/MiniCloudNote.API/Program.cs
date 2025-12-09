@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +99,24 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
     };
 });
+
+// 1. Cấu hình Amazon S3 Client để trỏ về MinIO
+var minioConfig = new AmazonS3Config
+{
+    ServiceURL = builder.Configuration["Minio:ServiceURL"],
+    ForcePathStyle = true // <--- BẮT BUỘC PHẢI CÓ CHO MINIO (Nếu không nó sẽ lỗi DNS)
+};
+
+// 2. Đăng ký AmazonS3Client
+builder.Services.AddSingleton<IAmazonS3>(sp => 
+    new AmazonS3Client(
+        builder.Configuration["Minio:AccessKey"], 
+        builder.Configuration["Minio:SecretKey"], 
+        minioConfig
+    ));
+
+// 3. Đăng ký Storage Service của mình
+builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 var app = builder.Build();
 
