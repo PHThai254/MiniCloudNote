@@ -43,7 +43,40 @@ namespace MiniCloudNote.Infrastructure
             // 4. Tạo đường dẫn trả về(Giả định MinIO chạy ở localhost:9000)
             // Cấu trúc: http://localhost:9000/bucket-name/file-name
             // Lưu ý: Sau này ra Prod sẽ cấu hình domain khác
-            return $"/minio/{_bucketName}/{uniqueFileName}";
+            // return $"/minio/{_bucketName}/{uniqueFileName}";
+
+            // Thay vì trả về URL fake "/minio/...", ta trả về Tên File (Object Key)
+            // Vì Client cần Tên File này để xin Presigned URL sau này.
+            return uniqueFileName;
+        }
+        // === 1. CHỨC NĂNG LẤY LINK (PRESIGNED URL) ===
+        public Task<string> GetFileUrlAsync(string fileName)
+        {
+            // Tạo yêu cầu xin vé
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = _bucketName,
+                Key = fileName,
+                Expires = DateTime.UtcNow.AddMinutes(60) // Vé hết hạn sau 60 phút
+            };
+
+            // Nhờ AWS SDK ký tên và trả về đường dẫn full
+            string url = _s3Client.GetPreSignedURL(request);
+            // === THÊM DÒNG NÀY: Hack fix cho môi trường Dev ===
+            // Nếu SDK lỡ tạo https thì mình sửa lại thành http
+            url = url.Replace("https://localhost:9000", "http://localhost:9000");   
+            return Task.FromResult(url);
+        }
+        // === 2. CHỨC NĂNG XOÁ FILE ===
+        public async Task DeleteFileAsync(string fileName)
+        {
+            var deleteRequest = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = fileName
+            };
+
+            await _s3Client.DeleteObjectAsync(deleteRequest);
         }
     }
 }

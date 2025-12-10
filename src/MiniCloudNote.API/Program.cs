@@ -103,8 +103,10 @@ builder.Services.AddAuthentication(options =>
 // 1. Cấu hình Amazon S3 Client để trỏ về MinIO
 var minioConfig = new AmazonS3Config
 {
-    ServiceURL = builder.Configuration["Minio:ServiceURL"],
-    ForcePathStyle = true // <--- BẮT BUỘC PHẢI CÓ CHO MINIO (Nếu không nó sẽ lỗi DNS)
+    // Ép cứng HTTP tại đây để đảm bảo không bị file cấu hình nào ghi đè
+    ServiceURL = "http://localhost:9000",
+    ForcePathStyle = true, // <--- BẮT BUỘC PHẢI CÓ CHO MINIO (Nếu không nó sẽ lỗi DNS)
+    UseHttp = true // <--- Dùng HTTP thay vì HTTPS (MinIO thường chạy trên HTTP)
 };
 
 // 2. Đăng ký AmazonS3Client
@@ -148,7 +150,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 
 app.UseAuthentication(); // Soát vé (Bạn là ai?)
