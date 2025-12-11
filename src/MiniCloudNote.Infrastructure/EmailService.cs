@@ -1,12 +1,22 @@
+using MiniCloudNote.Core.Interfaces; // Nhớ dòng using này để thấy Interface
+using System;
+using System.Threading.Tasks;
+
 namespace MiniCloudNote.Infrastructure
 {
-    public class EmailService // Sẽ implement IEmailService ở bài DIP
+    // Thêm ": IEmailService" vào sau tên class để thực hiện kế thừa
+    public class EmailService : IEmailService
     {
-        public void SendEmail(string title)
+        // Hàm này bắt buộc phải có vì Interface yêu cầu
+        public async Task SendWelcomeEmailAsync(string email, string name)
         {
-            // === TRÁCH NHIỆM 3: Email (đã chuyển về đây) ===
-            Console.WriteLine("Đang kết nối tới dịch vụ Email...");
-            Console.WriteLine($"Gửi email tới người dùng: 'Bạn vừa tạo ghi chú {title}'");
+            // Logic giả lập gửi mail (Delay 5s)
+            Console.WriteLine($"[Job Hangfire] Dang chuan bi gui email cho: {name} ({email})...");
+            
+            // Giả vờ mạng chậm mất 5 giây
+            await Task.Delay(5000); 
+            
+            Console.WriteLine($"[Job Hangfire] -> DA GUI THANH CONG CHO: {name}!");
         }
     }
 }

@@ -10,6 +10,8 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Amazon.S3;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +70,21 @@ builder.Services.AddSwaggerGen(c =>
 // Đăng ký DbContext sử dụng PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
+
+// === 1. CẤU HÌNH HANGFIRE SERVICE ===
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    // Sử dụng Database PostgreSQL để lưu Job
+    .UsePostgreSqlStorage(options =>        
+        options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")))
+);
+
+// === 2. BẬT HANGFIRE SERVER (QUAN TRỌNG) ===
+// Nếu thiếu dòng này, Job sẽ chỉ nằm chờ trong DB mà không ai xử lý
+builder.Services.AddHangfireServer();
+
 // === ĐĂNG KÝ SERVICE CỦA MÌNH (DI) ===
 builder.Services.AddScoped<IFormattingStrategy, MarkdownFormattingStrategy>();
 builder.Services.AddScoped<IFormattingStrategy, PlainTextFormattingStrategy>();
@@ -79,8 +95,8 @@ builder.Services.AddScoped<INoteService, NoteService>();
 // Đăng ký Repository (DIP - Interface map với Class)
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 
-// Đăng ký EmailService (Tạm thời)
-builder.Services.AddScoped<EmailService>();
+// Đăng ký EmailService 
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Đăng ký Authentication Services (Ngày 12)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -169,7 +185,10 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication(); // Soát vé (Bạn là ai?)
 app.UseAuthorization(); // Soi quyền (Bạn được làm gì?)
 
+// === 3. BẬT DASHBOARD ===
+// Truy cập tại: /hangfire
+app.UseHangfireDashboard();
+
 // Kích hoạt các Controller (NotesController)
 app.MapControllers();
-
 app.Run();
