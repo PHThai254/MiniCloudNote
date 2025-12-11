@@ -15,6 +15,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// === BẮT ĐẦU: Cấu hình Redis Cache ===
+// Lấy chuỗi kết nối (Ưu tiên biến môi trường nếu có, fallback về localhost)
+// Khi chạy trong Docker Compose, ta sẽ set biến môi trường REDIS_CONNECTION=redis:6379
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnection;
+    options.InstanceName = "MiniCloud_"; // Tiền tố cho các key đỡ bị lẫn
+});
+// === KẾT THÚC ===
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

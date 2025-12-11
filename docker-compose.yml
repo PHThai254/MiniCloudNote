@@ -58,7 +58,29 @@ services:
       - minicloud-network
     restart: always
 
+  redis:
+    image: redis:alpine
+    container_name: minicloud-redis
+    command: redis-server --appendonly yes # Giúp lưu dữ liệu xuống ổ cứng để không mất khi restart
+    volumes:
+      - redis_data:/data 
+    networks:
+      - minicloud-network
+    restart: always
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: minicloud-redis-ui
+    environment:
+      - REDIS_HOSTS=local:redis:6379 # Kết nối vào container 'redis'
+    ports:
+      - "8081:8081" # Cổng Web quản lý
+    networks:
+      - minicloud-network
+    depends_on:
+      - redis
 # Khai báo volume ở cuối file
 volumes:
   postgres_data:
   minio_data: # Tạo volume cho MinIO
+  redis_data: # Tạo volume cho Redis
