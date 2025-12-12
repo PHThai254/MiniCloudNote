@@ -79,8 +79,21 @@ services:
       - minicloud-network
     depends_on:
       - redis
+  seq:
+    image: datalust/seq:latest
+    container_name: minicloud-seq
+    environment:
+      - ACCEPT_EULA=Y # Đồng ý điều khiển sử dụng
+      - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_PASSWORD}
+    ports:
+      - "5341:5341" # Cổng nhận dữ liệu
+      - "8088:80" # Cổng Web UI (Map từ 80 trong container ra 8088 ngoài)
+    networks:
+      - minicloud-network
+    restart: always
 # Khai báo volume ở cuối file
 volumes:
   postgres_data:
   minio_data: # Tạo volume cho MinIO
   redis_data: # Tạo volume cho Redis
+

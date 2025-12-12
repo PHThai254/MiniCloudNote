@@ -3,7 +3,11 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# --- Docker ---
+# Bỏ qua file override (cấu hình local của riêng bạn)
+docker-compose.override.yml
+
+# Bỏ qua file biến môi trường (chứa mật khẩu)
 .env
 
 # User-specific files
@@ -484,3 +488,8 @@ $RECYCLE.BIN/
 *.swp
 
 /learning-scratchpad
+
+# Ignore Backup files
+*.sql
+*.dump
+backup_minio_data/

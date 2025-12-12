@@ -12,8 +12,33 @@ using Microsoft.OpenApi.Models;
 using Amazon.S3;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Hangfire.Logging.LogProviders;
+using Serilog;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// === 1. CẤU HÌNH SERILOG (LOGGING) ===
+// Xóa bộ log mặc định, thay bằng Serilog
+builder.Host.UseSerilog((context, config) => 
+{
+    config.WriteTo.Console(); // Vẫn ghi ra màn hình đen
+    config.WriteTo.Seq("http://localhost:5341"); // Gửi log sang container Seq
+    config.Enrich.FromLogContext(); // Thêm thông tin ngữ cảnh
+});
+
+// === 2. CẤU HÌNH HEALTH CHECKS ===
+// Lấy Connection String
+var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
+
+builder.Services.AddHealthChecks()
+    // Kiểm tra Database PostgreSQL
+    .AddNpgSql(dbConnection, name: "PostgreSQL Database")
+    // Kiểm tra Redis
+    .AddRedis(redisConnection, name: "Redis Cache");
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -21,7 +46,7 @@ builder.Services.AddControllers();
 // === BẮT ĐẦU: Cấu hình Redis Cache ===
 // Lấy chuỗi kết nối (Ưu tiên biến môi trường nếu có, fallback về localhost)
 // Khi chạy trong Docker Compose, ta sẽ set biến môi trường REDIS_CONNECTION=redis:6379
-var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
+// var redisConnection = Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379";
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -189,6 +214,27 @@ app.UseAuthorization(); // Soi quyền (Bạn được làm gì?)
 // Truy cập tại: /hangfire
 app.UseHangfireDashboard();
 
+// === 3. BẬT ENDPOINT HEALTH CHECK ===
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    // Cấu hình để trả về JSON chi tiết thay vì chỉ chữ "Healthy"
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            Status = report.Status.ToString(),
+            Checks = report.Entries.Select(e => new 
+            {
+                Component = e.Key,
+                Status = e.Value.Status.ToString(),
+                Description = e.Value.Description ?? "OK"
+            }),
+            Duration = report.TotalDuration
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+    }
+});
 // Kích hoạt các Controller (NotesController)
 app.MapControllers();
 app.Run();
