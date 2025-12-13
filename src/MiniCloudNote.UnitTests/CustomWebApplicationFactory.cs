@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting; // Để dùng IHostedService
 using MiniCloudNote.Infrastructure.Data;
 using System.Linq;
 
@@ -13,44 +14,46 @@ namespace MiniCloudNote.UnitTests
         {
             builder.ConfigureServices(services =>
             {
-                // === 1. XÓA DATABASE CŨ (Code cũ giữ nguyên) ===                
+                // === CHIẾN DỊCH: DỌN SẠCH BÁCH MỌI THỨ CẢN ĐƯỜNG ===
+
+                // 1. Tìm tất cả các dịch vụ "gây rắc rối" bằng cách soi tên (Name-based search)
+                // Cách này bất bại vì không cần quan tâm Type cụ thể nằm ở đâu
                 var servicesToRemove = services.Where(d =>
-                    // Tìm tất cả dịch vụ có tên chứa "DbContextOptions"
-                    (d.ServiceType.Name.Contains("DbContextOptions")) || 
-                    // Tìm tất cả dịch vụ có tên chứa "AppDbContext"
-                    (d.ServiceType.Name.Contains("AppDbContext"))
+                    // a. Xóa DbContext cũ (Cấu hình Npgsql)
+                    d.ServiceType.Name.Contains("DbContextOptions") ||
+                    d.ServiceType.Name.Contains("AppDbContext") ||
+                    
+                    // b. Xóa Hangfire (Server chạy ngầm)
+                    d.ImplementationType?.Name.Contains("BackgroundJobServerHostedService") == true ||
+                    d.ServiceType.Name.Contains("IHostedService") && d.ImplementationType?.Name.Contains("Hangfire") == true ||
+
+                    // c. Xóa Health Checks (Redis, NpgSql...) 
+                    // Health Check đăng ký các "HealthCheckRegistration" vào DI. Ta xóa hết đi để nó không check nữa.
+                    d.ServiceType.Name.Contains("HealthCheckRegistration")
                 ).ToList();
 
-                // Xóa không thương tiếc
+                // 2. Xóa sổ chúng
                 foreach (var d in servicesToRemove)
                 {
                     services.Remove(d);
                 }
 
-                // === 2. XÓA HANGFIRE SERVER ===
-                // Tìm dịch vụ chạy ngầm có tên chứa "BackgroundJobServerHostedService"
-                var hangfireService = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService) && 
-                         d.ImplementationType != null && 
-                         d.ImplementationType.Name.Contains("BackgroundJobServerHostedService"));
-                
-                // Nếu tìm thấy thì xóa sổ nó đi -> Hangfire sẽ không khởi động nữa
-                if (hangfireService != null) services.Remove(hangfireService);
+                // === THIẾT LẬP LẠI MÔI TRƯỜNG TEST ===
 
-                // === 3. CÀI ĐẶT LẠI IN-MEMORY ===
+                // 3. Cài Database In-Memory (RAM)
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("InMemoryDbForTesting");
+                    // Đặt tên DB khác nhau cho mỗi lần chạy để tránh cache
+                    options.UseInMemoryDatabase("InMemoryDbForTesting_" + System.Guid.NewGuid());
                 });
 
-                // === 4. KHỞI TẠO DATABASE ===
+                // 4. Khởi tạo Database
                 var sp = services.BuildServiceProvider();
                 using (var scope = sp.CreateScope())
                 {
                     var scopedServices = scope.ServiceProvider;
                     var db = scopedServices.GetRequiredService<AppDbContext>();
 
-                    db.Database.EnsureDeleted();
                     db.Database.EnsureCreated();
                 }
             });
