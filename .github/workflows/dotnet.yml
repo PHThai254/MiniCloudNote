@@ -1,0 +1,40 @@
+# Tên của Workflow (Sẽ hiện trên giao diện GitHub)
+name: .NET CI
+
+# KHI NÀO THÌ CHẠY?
+on:
+  push:
+    branches: [ main ] # Chạy khi có code push vào nhánh main
+  pull_request:
+    branches: [ main ] # Chạy khi có ai đó tạo Pull Request vào main
+
+# ROBOT SẼ LÀM GÌ?
+jobs:
+  build-and-test:
+    # Thuê máy chủ Ubuntu miễn phí của GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Kéo code từ kho chứa về máy ảo
+    - uses: actions/checkout@v4
+
+    # 2. Cài đặt .NET, Build và Test
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x' # Cài đặt .NET 9 SDK
+
+    # 3. Khôi phục các thư viện (NuGet Restore)
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # 4. Build dự án (Kiểm tra lỗi cú pháp)
+    - name: Build
+      run: dotnet build --no-restore
+    
+    # 5. Chạy Test (Unit & Integration)
+    # Nhờ hôm qua ta đã cấu hình In-Memory DB, nên ở đây không cần cài Postgres thật!
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    
