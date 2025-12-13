@@ -27,23 +27,23 @@ namespace MiniCloudNote.UnitTests
                     services.Remove(d);
                 }
 
-                // === 2. (MỚI) XÓA HANGFIRE SERVER ===
+                // === 2. XÓA HANGFIRE SERVER ===
                 // Tìm dịch vụ chạy ngầm có tên chứa "BackgroundJobServerHostedService"
                 var hangfireService = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(IHostedService) && 
+                    d => d.ServiceType == typeof(Microsoft.Extensions.Hosting.IHostedService) && 
                          d.ImplementationType != null && 
                          d.ImplementationType.Name.Contains("BackgroundJobServerHostedService"));
                 
                 // Nếu tìm thấy thì xóa sổ nó đi -> Hangfire sẽ không khởi động nữa
                 if (hangfireService != null) services.Remove(hangfireService);
 
-                // === CÀI ĐẶT LẠI IN-MEMORY ===
+                // === 3. CÀI ĐẶT LẠI IN-MEMORY ===
                 services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
 
-                // === KHỞI TẠO DATABASE ===
+                // === 4. KHỞI TẠO DATABASE ===
                 var sp = services.BuildServiceProvider();
                 using (var scope = sp.CreateScope())
                 {
