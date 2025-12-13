@@ -13,9 +13,7 @@ namespace MiniCloudNote.UnitTests
         {
             builder.ConfigureServices(services =>
             {
-                // === CHIẾN THUẬT MỚI: DỌN DẸP THEO TÊN (NAME-BASED REMOVAL) ===
-                // Cách này mạnh hơn vì nó bắt được cả DbContextPool, Options, Generic Options...
-                
+                // === 1. XÓA DATABASE CŨ (Code cũ giữ nguyên) ===                
                 var servicesToRemove = services.Where(d =>
                     // Tìm tất cả dịch vụ có tên chứa "DbContextOptions"
                     (d.ServiceType.Name.Contains("DbContextOptions")) || 
@@ -28,6 +26,16 @@ namespace MiniCloudNote.UnitTests
                 {
                     services.Remove(d);
                 }
+
+                // === 2. (MỚI) XÓA HANGFIRE SERVER ===
+                // Tìm dịch vụ chạy ngầm có tên chứa "BackgroundJobServerHostedService"
+                var hangfireService = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(IHostedService) && 
+                         d.ImplementationType != null && 
+                         d.ImplementationType.Name.Contains("BackgroundJobServerHostedService"));
+                
+                // Nếu tìm thấy thì xóa sổ nó đi -> Hangfire sẽ không khởi động nữa
+                if (hangfireService != null) services.Remove(hangfireService);
 
                 // === CÀI ĐẶT LẠI IN-MEMORY ===
                 services.AddDbContext<AppDbContext>(options =>
