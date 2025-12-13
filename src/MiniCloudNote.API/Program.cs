@@ -238,3 +238,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 // Kích hoạt các Controller (NotesController)
 app.MapControllers();
 app.Run();
+
+// Thêm dòng này để project test nhìn thấy 
+public partial class Program { }
+
