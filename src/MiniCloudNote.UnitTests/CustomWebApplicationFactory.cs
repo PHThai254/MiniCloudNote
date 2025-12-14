@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting; // Để dùng IHostedService
+using Microsoft.Extensions.Hosting; // Cần dòng này cho IHostedService
 using MiniCloudNote.Infrastructure.Data;
 using System.Linq;
 
@@ -14,46 +14,57 @@ namespace MiniCloudNote.UnitTests
         {
             builder.ConfigureServices(services =>
             {
-                // === CHIẾN DỊCH: DỌN SẠCH BÁCH MỌI THỨ CẢN ĐƯỜNG ===
-
-                // 1. Tìm tất cả các dịch vụ "gây rắc rối" bằng cách soi tên (Name-based search)
-                // Cách này bất bại vì không cần quan tâm Type cụ thể nằm ở đâu
-                var servicesToRemove = services.Where(d =>
-                    // a. Xóa DbContext cũ (Cấu hình Npgsql)
-                    d.ServiceType.Name.Contains("DbContextOptions") ||
-                    d.ServiceType.Name.Contains("AppDbContext") ||
-                    
-                    // b. Xóa Hangfire (Server chạy ngầm)
-                    d.ImplementationType?.Name.Contains("BackgroundJobServerHostedService") == true ||
-                    d.ServiceType.Name.Contains("IHostedService") && d.ImplementationType?.Name.Contains("Hangfire") == true ||
-
-                    // c. Xóa Health Checks (Redis, NpgSql...) 
-                    // Health Check đăng ký các "HealthCheckRegistration" vào DI. Ta xóa hết đi để nó không check nữa.
-                    d.ServiceType.Name.Contains("HealthCheckRegistration")
-                ).ToList();
-
-                // 2. Xóa sổ chúng
-                foreach (var d in servicesToRemove)
+                // === CHIẾN DỊCH DỌN DẸP 2.0: DÙNG VÒNG LẶP QUÉT SẠCH ===
+                
+                // Chạy vòng lặp từ dưới lên trên để xóa an toàn (tránh lỗi Index out of range)
+                for (int i = services.Count - 1; i >= 0; i--)
                 {
-                    services.Remove(d);
+                    var d = services[i];
+
+                    // 1. Xóa Database cũ (Postgres)
+                    if (d.ServiceType.Name.Contains("DbContextOptions") || 
+                        d.ServiceType.Name.Contains("AppDbContext"))
+                    {
+                        services.RemoveAt(i);
+                        continue;
+                    }
+
+                    // 2. Xóa Hangfire (Kẻ thù gây lỗi TaskCanceled)
+                    // Hangfire chạy ngầm dưới danh nghĩa IHostedService
+                    if (d.ServiceType == typeof(IHostedService))
+                    {
+                        // Kiểm tra tên thật của nó xem có chữ "Hangfire" hay "BackgroundJob" không
+                        var implName = d.ImplementationType?.FullName ?? "";
+                        if (implName.Contains("Hangfire") || implName.Contains("BackgroundJobServer"))
+                        {
+                            services.RemoveAt(i);
+                            continue;
+                        }
+                    }
+
+                    // 3. Xóa Health Checks (Kẻ thù gây lỗi 503 Service Unavailable)
+                    // Các bài kiểm tra (Redis, NpgSql) được đăng ký dưới tên "HealthCheckRegistration"
+                    if (d.ServiceType.Name.Contains("HealthCheckRegistration"))
+                    {
+                        services.RemoveAt(i);
+                        continue;
+                    }
                 }
 
-                // === THIẾT LẬP LẠI MÔI TRƯỜNG TEST ===
-
-                // 3. Cài Database In-Memory (RAM)
+                // === CÀI LẠI MÔI TRƯỜNG TEST (IN-MEMORY) ===
+                
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    // Đặt tên DB khác nhau cho mỗi lần chạy để tránh cache
+                    // Thêm Guid để mỗi lần test là một DB mới tinh, không bị cache
                     options.UseInMemoryDatabase("InMemoryDbForTesting_" + System.Guid.NewGuid());
                 });
 
-                // 4. Khởi tạo Database
+                // Khởi tạo Database
                 var sp = services.BuildServiceProvider();
                 using (var scope = sp.CreateScope())
                 {
                     var scopedServices = scope.ServiceProvider;
                     var db = scopedServices.GetRequiredService<AppDbContext>();
-
                     db.Database.EnsureCreated();
                 }
             });
