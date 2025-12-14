@@ -87,10 +87,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Đăng ký DbContext (EF Core)
-// Lưu ý: Khi Test, Factory sẽ thay thế cái này bằng In-Memory, nên cứ để nguyên dòng này cũng được.
-// Hoặc bọc trong if (!isTesting) cũng được, nhưng để nguyên cho Factory tự xử lý thì linh hoạt hơn.
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// CHỈ DÙNG POSTGRES NẾU KHÔNG PHẢI LÀ TESTING
+if (!isTesting)
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));   
+}
 
 // === 3. CẤU HÌNH HANGFIRE (CHỈ CHẠY KHI KHÔNG TEST) ===
 if (!isTesting)

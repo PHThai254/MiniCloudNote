@@ -11,35 +11,34 @@ namespace MiniCloudNote.UnitTests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // 1. QUAN TRỌNG NHẤT: Bật chế độ "Testing"
-            // Dòng này giúp Program.cs biết là đang test để bỏ qua Redis, Hangfire...
+            // Đặt môi trường là Testing để Program.cs nhận biết
             builder.UseEnvironment("Testing");
 
             builder.ConfigureServices(services =>
             {
-                // 2. Chỉ cần xóa DbContext cũ (Postgres) là đủ
-                // Không cần vòng lặp phức tạp nữa vì Program.cs đã tự loại bỏ Hangfire/HealthCheck rồi
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                // Dù Program.cs đã chặn Npgsql, ta vẫn quét dọn 1 lần nữa cho chắc chắn (Double-check)
+                // Xóa tất cả Service liên quan đến DbContextOptions (Kẻ thù gây lỗi "Single database provider")
+                var optionsDescriptors = services.Where(d => 
+                    d.ServiceType == typeof(DbContextOptions<AppDbContext>) || 
+                    d.ServiceType == typeof(DbContextOptions)
+                ).ToList();
 
-                if (descriptor != null)
+                foreach (var d in optionsDescriptors)
                 {
-                    services.Remove(descriptor);
+                    services.Remove(d);
                 }
-                
-                // 3. Cài In-Memory Database
+
+                // Cài đặt In-Memory Database
                 services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting_" + System.Guid.NewGuid());
                 });
 
-                // 4. Khởi tạo Database
+                // Khởi tạo Database
                 var sp = services.BuildServiceProvider();
                 using (var scope = sp.CreateScope())
                 {
-                    var scopedServices = scope.ServiceProvider;
-                    var db = scopedServices.GetRequiredService<AppDbContext>();
-                    
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                     db.Database.EnsureCreated();
                 }
             });

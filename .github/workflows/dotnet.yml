@@ -37,6 +37,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
       env:
+        ASPNETCORE_ENVIRONMENT: Testing
         Jwt__Key: "DayLaMotCaiKeyRatDaiDeTestTrenGitHubActionsJob33"
         ConnectionStrings__DefaultConnection: "Server=dummy_server;Database=dummy_db;User Id=dummy;Password=dummy;"
        
