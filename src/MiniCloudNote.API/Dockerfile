@@ -1,13 +1,14 @@
 # === GIAI ĐOẠN 1: CHẾ BIẾN (BUILD STAGE) ===
 # Dùng ảnh chứa đầy đủ công cụ (SDK) để biên dịch code
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# 1. Copy các file dự án (.csproj) vào trước để restore (Tối ưu cache)
-# Vì cấu trúc của chúng ta có 3 Project, phải copy cả 3
-COPY ["src/MiniCloudNote.API/MiniCloudNote.API.csproj", "src/MiniCloudNote.API/"]
-COPY ["src/MiniCloudNote.Core/MiniCloudNote.Core.csproj", "src/MiniCloudNote.Core/"]
-COPY ["src/MiniCloudNote.Infrastructure/MiniCloudNote.Infrastructure.csproj", "src/MiniCloudNote.Infrastructure/"]
+# 1. COPY CÁC FILE DỰ ÁN (.csproj) TRƯỚC 
+# Mẹo: Dùng *.csproj để đỡ phải gõ tên file dài dòng, và copy giữ nguyên cấu trúc thư mục
+# Lưu ý: Lệnh COPY này giả định Build Context là thư mục gốc MiniCloudNote
+COPY src/MiniCloudNote.API/*.csproj ./src/MiniCloudNote.API/
+COPY src/MiniCloudNote.Core/*.csproj ./src/MiniCloudNote.Core/
+COPY src/MiniCloudNote.Infrastructure/*.csproj ./src/MiniCloudNote.Infrastructure/
 
 # 2. Tải thư viện về (Restore)
 RUN dotnet restore "src/MiniCloudNote.API/MiniCloudNote.API.csproj"
@@ -17,15 +18,16 @@ COPY . .
 
 # 4. Biên dịch và Xuất bản (Publish) ra thư mục /app/publish
 # -c Release: Chế độ tối ưu cho chạy thật (nhẹ hơn Debug)
-WORKDIR "/src/src/MiniCloudNote.API"
-RUN dotnet publish "MiniCloudNote.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+WORKDIR /app/src/MiniCloudNote.API
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 # === GIAI ĐOẠN 2: ĐÓNG HỘP (RUNTIME STAGE) ===
 # Dùng ảnh siêu nhẹ (chỉ có Runtime, không có SDK) để chạy
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
-# Mở cổng 8080 (Cổng mặc định mới của .NET Container)
+# Biến môi trường để ép .NET luôn lắng nghe port 8080 (Docker chuẩn)
+ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 
 # Copy "món ăn đã nấu" từ giai đoạn 1 sang giai đoạn 2

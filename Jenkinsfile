@@ -94,4 +94,36 @@ pipeline {
             }
         }
     }
+
+    post {
+        success {
+            script {
+                discordSend("✅ BUILD THÀNH CÔNG!", "3066993") // Màu xanh
+            }
+        }
+        failure {
+            script {
+                discordSend("❌ BUILD THẤT BẠI!", "15158332") // Màu Đỏ
+            }
+        }
+    }
+}
+
+// Hàm gửi tin nhắn
+def discordSend(String title, String color) {
+    withCredentials([string(credentialsId: 'discord-webhook-url', variable: 'DISCORD_URL')]) {
+        sh """
+            curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+                "username": "Jenkins Master",
+                "embeds": [{
+                    "title": "${title}",
+                    "description": "Job: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}\\n[Xem chi tiết](${env.BUILD_URL})",
+                    "color": ${color}
+                }]     
+            }' \
+            $DISCORD_URL
+        """    
+    }
 }
