@@ -49,7 +49,7 @@ pipeline {
             }
         }
         // 4. TRIỂN KHAI (CD) - Chạy thử trên cổng 5050
-        stage('Deploy Staging') {
+        stages('Deploy Staging') {
             // Khai báo biến môi trường lấy từ kho bí mật
             environment {
                 // Biến DB_STRING sẽ chứa giá trị thật, nhưng Jenkins sẽ giấu nó đi
