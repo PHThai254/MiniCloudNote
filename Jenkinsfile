@@ -87,6 +87,7 @@ pipeline {
                         -p ${port}:8080 \
                         -e ConnectionStrings__DefaultConnection="$DB_STRING" \
                         -e REDIS_CONNECTION='minicloud-redis:6379' \
+                        -e ASPNETCORE_ENVIRONMENT=Development \
                         ${imageTag}
                     """       
                 }
