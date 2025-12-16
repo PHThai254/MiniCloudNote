@@ -13,7 +13,9 @@ pipeline {
                 }
             }
             steps {
-                sh 'dotnet test src/MiniCloudNote.Tests/MiniCloudNote.Tests.csproj'
+                // /p:CollectCoverage=true : Bật chế độ đo
+                // /p:Threshold=1          : Nếu độ phủ dưới 1% thì coi như LỖI (Build Failed)
+                sh 'dotnet test src/MiniCloudNote.Tests/MiniCloudNote.Tests.csproj /p:CollectCoverage=true /p:Threshold=1'
             }
         }
         // 1. Lấy code về (Dùng agent nào cũng được, chọn 'any' cho nhanh)
