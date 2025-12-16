@@ -17,6 +17,6 @@ public class UnitTest1
 
         // 3. Assert (Khẳng định kết quả)
         // Nếu result không phải là 2 -> Test Failed -> Jenkins Báo lỗi
-        Assert.Equal(3, result);
+        Assert.Equal(2, result);
     }
 }
