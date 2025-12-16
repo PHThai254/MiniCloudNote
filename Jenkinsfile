@@ -111,19 +111,23 @@ pipeline {
 
 // Hàm gửi tin nhắn
 def discordSend(String title, String color) {
-    withCredentials([string(credentialsId: 'discord-webhook-url', variable: 'DISCORD_URL')]) {
-        sh """
-            curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{
-                "username": "Jenkins Master",
-                "embeds": [{
-                    "title": "${title}",
-                    "description": "Job: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}\\n[Xem chi tiết](${env.BUILD_URL})",
-                    "color": ${color}
-                }]     
-            }' \
-            $DISCORD_URL
-        """    
+    // Thêm 'node' để Jenkins cấp một executor chạy lệnh này
+    node {
+        withCredentials([string(credentialsId: 'discord-webhook-url', variable: 'DISCORD_URL')]) {
+            // Thêm dấu \ trước biến DISCORD_URL để sửa lỗi bảo mật (để Shell tự xử lý thay vì Groovy)
+            sh """
+                curl -H "Content-Type: application/json" \
+                -X POST \
+                -d '{
+                    "username": "Jenkins Master",
+                    "embeds": [{
+                        "title": "${title}",
+                        "description": "Job: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}\\n[Xem chi tiết](${env.BUILD_URL})",
+                        "color": ${color}
+                    }]     
+                }' \
+                "\$DISCORD_URL"
+            """ 
+        }   
     }
 }
