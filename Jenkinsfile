@@ -2,6 +2,20 @@ pipeline {
     agent none
 
     stages {
+        // 0. chạy Test
+        stage('Unit Test') {
+            agent {
+                docker {
+                    // Dùng Image SDK để có lệnh 'dotnet test'
+                    image 'mcr.microsoft.com/dotnet/sdk:9.0'
+                    // Mount thư mục hiện tại vào container để thấy code
+                    args '-v $PWD:/app -w /app'
+                }
+            }
+            steps {
+                sh 'dotnet test src/MiniCloudNote.Tests/MiniCloudNote.Tests.csproj'
+            }
+        }
         // 1. Lấy code về (Dùng agent nào cũng được, chọn 'any' cho nhanh)
         stage('Checkout') {
             agent any
