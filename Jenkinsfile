@@ -78,7 +78,7 @@ pipeline {
                     sh """
                         docker run -d \
                         --name ${containerName} \
-                        --network minicloud-network \
+                        --network minicloudnote_minicloud-network \
                         -p ${port}:8080 \
                         -e ConnectionStrings__DefaultConnection='${env.ConnectionStrings__DefaultConnection}' \
                         -e REDIS_CONNECTION='minicloud-redis:6379' \
