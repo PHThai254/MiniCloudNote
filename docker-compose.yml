@@ -91,9 +91,25 @@ services:
     networks:
       - minicloud-network
     restart: always
+  
+  jenkins:
+    image: jenkins/jenkins:lts 
+    container_name: minicloud-jenkins
+    user: root # BẮT BUỘC: Chạy quyền root để có quyền truy cập docker.sock của máy chủ
+    ports: 
+      - "8888:8080" # Cổng Web UI của Jenkins (Cổng ngoài 8888 -> Cổng trong 8080)
+      - "50000:50000" # Cổng để các máy con (Agent) kết nối vào
+    volumes:
+      - jenkins_data:/var/jenkins_home # Lưu trữ cấu hình Jenkins bền vững
+      - /var/run/docker.sock:/var/run/docker.sock # " Cửa thần kỳ " để Jenkins điều khiển Docker máy chủ
+    networks:
+      - minicloud-network
+    restart: always
+      
 # Khai báo volume ở cuối file
 volumes:
   postgres_data:
   minio_data: # Tạo volume cho MinIO
   redis_data: # Tạo volume cho Redis
+  jenkins_data: # Tạo volume cho Jenkins
 
