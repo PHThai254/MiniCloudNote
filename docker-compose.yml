@@ -93,7 +93,8 @@ services:
     restart: always
   
   jenkins:
-    image: jenkins/jenkins:lts 
+    # image: jenkins/jenkins:lts 
+    build: ./jenkins-custom # Trỏ vào thư mục chứa Dockerfile
     container_name: minicloud-jenkins
     user: root # BẮT BUỘC: Chạy quyền root để có quyền truy cập docker.sock của máy chủ
     ports: 

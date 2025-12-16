@@ -48,5 +48,44 @@ pipeline {
                 }
             }
         }
+        // 4. TRIỂN KHAI (CD) - Chạy thử trên cổng 5050
+        stage('Deploy Staging') {
+            agent {
+                docker {
+                    image 'docker'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            steps {
+                script {
+                    def containerName = "minicloud-staging"
+                    def port = "5050" // Cổng cho bản chạy thử
+
+                    // Lấy tag vừa build ở bước trước (cần đồng bộ biến này)
+                    // Để đơn giản cho bài học, ta hardcode hoặc dùng biến môi trường.
+                    // Ở đây ta dùng lại logic đặt tên:
+                    def imageTag = "minicloudnote:jenkins-${env.BUILD_ID}"
+
+                    echo "Deploying ${imageTag} to Staging..."
+
+                    // 1. Dọn dẹp: Nếu có bản staging cũ đang chạy thì tắt và xóa đi
+                    // Dùng '|| true' để không báo lỗi nếu container chưa tồn tại
+                    sh "docker stop ${containerName} || true"
+                    sh "docker rm ${containerName} || true"
+
+                    // 2. Chạy container mới
+                    // --network minicloud-network: Để nó kết nối được với DB, Redis cũ
+                    sh """
+                        docker run -d \
+                        --name ${containerName} \
+                        --network minicloud-network \
+                        -p ${port}:8080 \
+                        -e ConnectionStrings__DefaultConnection='${env.ConnectionStrings__DefaultConnection}' \
+                        -e REDIS_CONNECTION='minicloud-redis:6379' \
+                        ${imageTag}
+                    """       
+                }
+            }
+        }
     }
 }
