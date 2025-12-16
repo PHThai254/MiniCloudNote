@@ -21,7 +21,7 @@ pipeline {
             steps {
                 // Chạy lệnh thật trên code vừa tải về
                 sh 'dotnet restore ./src/MiniCloudNote.API/MiniCloudNote.API.csproj'
-                sh 'dotnet builds --no-restore ./src/MiniCloudNote.API/MiniCloudNote.API.csproj'
+                sh 'dotnet build --no-restore ./src/MiniCloudNote.API/MiniCloudNote.API.csproj'
                 
                 // Chạy luôn cả Test (cho máu!)
                 sh 'dotnet test --no-build ./src/MiniCloudNote.UnitTests/MiniCloudNote.UnitTests.csproj'
