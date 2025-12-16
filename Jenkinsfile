@@ -50,6 +50,11 @@ pipeline {
         }
         // 4. TRIỂN KHAI (CD) - Chạy thử trên cổng 5050
         stage('Deploy Staging') {
+            // Khai báo biến môi trường lấy từ kho bí mật
+            environment {
+                // Biến DB_STRING sẽ chứa giá trị thật, nhưng Jenkins sẽ giấu nó đi
+                DB_STRING = credentials('staging-db-conn-string')
+            }
             agent {
                 docker {
                     image 'docker'
@@ -80,7 +85,7 @@ pipeline {
                         --name ${containerName} \
                         --network minicloudnote_minicloud-network \
                         -p ${port}:8080 \
-                        -e ConnectionStrings__DefaultConnection='${env.ConnectionStrings__DefaultConnection}' \
+                        -e ConnectionStrings__DefaultConnection="$DB_STRING" \
                         -e REDIS_CONNECTION='minicloud-redis:6379' \
                         ${imageTag}
                     """       
