@@ -1,6 +1,5 @@
 pipeline {
     agent none
-
     stages {
         // 0. chạy Test
         stage('Unit Test') {
@@ -15,7 +14,14 @@ pipeline {
             steps {
                 // /p:CollectCoverage=true : Bật chế độ đo
                 // /p:Threshold=1          : Nếu độ phủ dưới 1% thì coi như LỖI (Build Failed)
-                sh 'dotnet test src/MiniCloudNote.Tests/MiniCloudNote.Tests.csproj /p:CollectCoverage=true /p:Threshold=0'
+                // Chạy Test & Xuất file kết quả dạng Cobertura (XML chuẩn quốc tế)
+                // Thêm /p:CoverletOutputFormat=corbertura để đảm bảo đúng định dạng
+                sh 'dotnet test src/MiniCloudNote.Tests/MiniCloudNote.Tests.csproj /p:CoverletOutputFormat=cobertura /p:CollectCoverage=true /p:Threshold=0'
+                // Cài đặt tool ReportGenerator (Cài cục bộ vào thư mục ./tools)
+                sh 'dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./tools'
+                // Chạy tool để chuyển file XML thành trang web HTML
+                // Nó sẽ đọc file xml trong folder Tests và xuất ra folder 'coverage-report'
+                sh './tools/reportgenerator "-reports:src/MiniCloudNote.Tests/coverage.cobertura.xml" "-targetdir:coverage-report" "-reporttypes:Html"'
             }
         }
         // 1. Lấy code về (Dùng agent nào cũng được, chọn 'any' cho nhanh)
@@ -116,6 +122,8 @@ pipeline {
             script {
                 discordSend("✅ BUILD THÀNH CÔNG!", "3066993") // Màu xanh
             }
+            // Lưu trữ báo cáo HTML lại
+            archiveArtifacts artifacts: 'coverage-report/**/*', allowEmptyArchive: true
         }
         failure {
             script {
@@ -124,7 +132,6 @@ pipeline {
         }
     }
 }
-
 // Hàm gửi tin nhắn
 def discordSend(String title, String color) {
     // Thêm 'node' để Jenkins cấp một executor chạy lệnh này
