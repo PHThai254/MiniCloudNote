@@ -23,6 +23,11 @@ pipeline {
                 // Nó sẽ đọc file xml trong folder Tests và xuất ra folder 'coverage-report'
                 sh './tools/reportgenerator "-reports:src/MiniCloudNote.Tests/coverage.cobertura.xml" "-targetdir:coverage-report" "-reporttypes:Html"'
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'coverage-report/**/*', allowEmptyArchive: true
+                }
+            }
         }
         // 1. Lấy code về (Dùng agent nào cũng được, chọn 'any' cho nhanh)
         stage('Checkout') {
@@ -122,8 +127,6 @@ pipeline {
             script {
                 discordSend("✅ BUILD THÀNH CÔNG!", "3066993") // Màu xanh
             }
-            // Lưu trữ báo cáo HTML lại
-            archiveArtifacts artifacts: 'coverage-report/**/*', allowEmptyArchive: true
         }
         failure {
             script {
