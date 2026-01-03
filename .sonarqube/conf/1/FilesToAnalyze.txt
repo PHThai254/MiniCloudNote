@@ -1,0 +1,11 @@
+﻿/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/AuthService.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Data/AppDbContext.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/EmailService.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251121043013_InitialCreate.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251121043013_InitialCreate.Designer.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251125164816_AddUserTable.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251125164816_AddUserTable.Designer.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/MinioStorageService.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/NoteRepository.cs
+/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/UserRepository.cs

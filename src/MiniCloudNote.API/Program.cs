@@ -31,7 +31,8 @@ builder.Host.UseSerilog((context, config) =>
     // Chỉ gửi log sang Seq nếu KHÔNG phải là test (để đỡ báo lỗi kết nối Seq khi test)
     if (!isTesting) 
     {
-        config.WriteTo.Seq("http://localhost:5341");
+        var SeqUrl = builder.Configuration["SeqUrl"] ?? "http://localhost:5431";
+        config.WriteTo.Seq(SeqUrl);
     }
     config.Enrich.FromLogContext();
 });
@@ -170,7 +171,7 @@ if (!isTesting)
         try
         {
             var context = services.GetRequiredService<AppDbContext>();
-            context.Database.Migrate();
+            await context.Database.MigrateAsync();
             Console.WriteLine("--> Migration Database done!");
         }
         catch (Exception ex)
@@ -223,7 +224,7 @@ else
 }
 
 app.MapControllers();
-app.Run();
+await app.RunAsync();
 
 // Dòng này bắt buộc để Integration Test nhìn thấy
 public partial class Program { }

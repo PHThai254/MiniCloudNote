@@ -1,0 +1,1 @@
+/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/3

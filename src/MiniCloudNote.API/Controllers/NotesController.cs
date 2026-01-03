@@ -112,6 +112,7 @@ namespace MiniCloudNote.API.Controllers
         }
         
         [HttpPost("format")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public IActionResult FormatNote([FromBody] FormatNoteRequest request)
         {
             // Controller gọi Service (tuân thủ SRP)
@@ -121,6 +122,7 @@ namespace MiniCloudNote.API.Controllers
 
         // 4. Thêm API kiểm tra cấu hình (Test nhanh)
         [HttpGet("config-test")]
+        [ProducesResponseType(typeof(ConfigResponse), StatusCodes.Status200OK)]
         public IActionResult GetConfig()
         {
             // Đọc giá trị "MyName" từ file json
@@ -129,22 +131,24 @@ namespace MiniCloudNote.API.Controllers
             // Đọc chuỗi kết nối (để xem nó có lấy đúng từ User Secrets không)
             var connStr = _configuration.GetConnectionString("DefaultConnection");
 
-            return Ok(new
+            return Ok(new ConfigResponse
             {
                 EnvironmentName = myName + " - Test Override Day 19", 
-                ConnectionString = connStr
+                ConnectionString = connStr ?? ""
             });
         }
 
         // 5. Thêm API trả vể tên server (Test nhanh)
         [HttpGet("who-am-i")]
         [AllowAnonymous] // Cho phép ai cũng gọi được để test cho nhanh
+        [ProducesResponseType(typeof(ServerInfoResponse), StatusCodes.Status200OK)]
         public IActionResult WhoAmI()
         {
             // Lấy tên máy (Trong Docker nó là Container ID)
             var serverName = Environment.MachineName;
     
-            return Ok(new { 
+            return Ok(new ServerInfoResponse
+            { 
                 Message = "Xin chào! Tôi là nhân viên phục vụ bạn.",
                 ServerId = serverName 
             });

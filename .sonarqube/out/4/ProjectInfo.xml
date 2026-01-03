@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <ProjectName>MiniCloudNote.UnitTests</ProjectName>
+  <ProjectLanguage>C#</ProjectLanguage>
+  <ProjectType>Test</ProjectType>
+  <ProjectGuid>119f1c01-fa90-439a-a846-8ce8e5466c2a</ProjectGuid>
+  <FullPath>/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/MiniCloudNote.UnitTests.csproj</FullPath>
+  <IsExcluded>false</IsExcluded>
+  <AnalysisResultFiles>
+    <AnalysisResultFile Id="FilesToAnalyze" Location="/mnt/c/Personal Project/MiniCloudNote/.sonarqube/conf/4/FilesToAnalyze.txt" />
+  </AnalysisResultFiles>
+  <AnalysisSettings>
+    <Property Name="sonar.cs.roslyn.reportFilePaths">/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4/Issues.json</Property>
+    <Property Name="sonar.cs.analyzer.projectOutPaths">/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4</Property>
+    <Property Name="sonar.cs.scanner.telemetry">/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4/Telemetry.json</Property>
+  </AnalysisSettings>
+  <Configuration>Debug</Configuration>
+  <Platform>AnyCPU</Platform>
+  <TargetFramework>net9.0</TargetFramework>
+</ProjectInfo>

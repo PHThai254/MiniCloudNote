@@ -1,0 +1,264 @@
+{
+  "scannerProperties": [
+    {
+      "key": "sonar.scanner.app",
+      "value": "ScannerMSBuild"
+    },
+    {
+      "key": "sonar.scanner.appVersion",
+      "value": "11.0"
+    },
+    {
+      "key": "sonar.scanner.bootstrapStartTime",
+      "value": "1767414225000"
+    },
+    {
+      "key": "sonar.projectKey",
+      "value": "MiniCloudNote"
+    },
+    {
+      "key": "sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar"
+    },
+    {
+      "key": "sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote"
+    },
+    {
+      "key": "sonar.pullrequest.cache.basepath",
+      "value": "/mnt/c/Personal Project/MiniCloudNote"
+    },
+    {
+      "key": "sonar.sources",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/jenkins-custom/Dockerfile,/mnt/c/Personal Project/MiniCloudNote/nginx/Dockerfile,/mnt/c/Personal Project/MiniCloudNote/nginx/nginx.conf,/mnt/c/Personal Project/MiniCloudNote/.github/workflows/dotnet.yml,/mnt/c/Personal Project/MiniCloudNote/backup_minio_data/.minio.sys/format.json,/mnt/c/Personal Project/MiniCloudNote/learning-scratchpad/obj/learning-scratchpad.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/learning-scratchpad/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/nginx/certs/minicloud.key,/mnt/c/Personal Project/MiniCloudNote/learning-scratchpad/bin/Debug/net9.0/learning-scratchpad.deps.json,/mnt/c/Personal Project/MiniCloudNote/learning-scratchpad/bin/Debug/net9.0/learning-scratchpad.runtimeconfig.json,/mnt/c/Personal Project/MiniCloudNote/learning-scratchpad/obj/Debug/net9.0/learning-scratchpad.sourcelink.json,/mnt/c/Personal Project/MiniCloudNote/src/.vs/MiniCloudNote/v17/DocumentLayout.backup.json,/mnt/c/Personal Project/MiniCloudNote/src/.vs/MiniCloudNote/v17/DocumentLayout.json,/mnt/c/Personal Project/MiniCloudNote/.env,/mnt/c/Personal Project/MiniCloudNote/docker-compose.override.yml,/mnt/c/Personal Project/MiniCloudNote/docker-compose.prod.yml,/mnt/c/Personal Project/MiniCloudNote/docker-compose.sonar.yml,/mnt/c/Personal Project/MiniCloudNote/docker-compose.yml"
+    },
+    {
+      "key": "sonar.tests",
+      "value": ""
+    },
+    {
+      "key": "sonar.modules",
+      "value": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D,2758215F-64A6-4D77-B08D-E58AEA1996F4,0C970FEF-0310-4EFD-9431-06355200669D,2A3219FF-1749-4378-96F3-4447F266C3BF,119F1C01-FA90-439A-A846-8CE8E5466C2A"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.projectKey",
+      "value": "MiniCloudNote:E24BA97B-C029-4E98-B02D-DD97BC3F1C4D"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.projectName",
+      "value": "MiniCloudNote.Core"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar/mod0"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.sourceEncoding",
+      "value": "utf-8"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.tests",
+      "value": ""
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.sources",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/Note.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/User.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IAuthService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IEmailService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IFormattingStrategy.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteContent.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteRepository.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IStorageService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IUserRepository.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/HtmlFormattingStrategy.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/MarkdownFormattingStrategy.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/PlainTextFormattingStrategy.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/NoteService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/TaxCalculator.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/MiniCloudNote.Core.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/bin/Debug/net9.0/MiniCloudNote.Core.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/Debug/net9.0/MiniCloudNote.Core.sourcelink.json"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.cs.analyzer.projectOutPaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/0"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.cs.roslyn.reportFilePaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/0/Issues.json"
+    },
+    {
+      "key": "E24BA97B-C029-4E98-B02D-DD97BC3F1C4D.sonar.cs.scanner.telemetry",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/0/Telemetry.json"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.projectKey",
+      "value": "MiniCloudNote:2758215F-64A6-4D77-B08D-E58AEA1996F4"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.projectName",
+      "value": "MiniCloudNote.Infrastructure"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar/mod1"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.sourceEncoding",
+      "value": "utf-8"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.tests",
+      "value": ""
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.sources",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/obj/MiniCloudNote.Infrastructure.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/bin/Debug/net9.0/MiniCloudNote.Infrastructure.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/obj/Debug/net9.0/MiniCloudNote.Infrastructure.sourcelink.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/AuthService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Data/AppDbContext.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/EmailService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251121043013_InitialCreate.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251121043013_InitialCreate.Designer.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251125164816_AddUserTable.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/20251125164816_AddUserTable.Designer.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/Migrations/AppDbContextModelSnapshot.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/MinioStorageService.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/NoteRepository.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/UserRepository.cs"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.cs.analyzer.projectOutPaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/1"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.cs.roslyn.reportFilePaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/1/Issues.json"
+    },
+    {
+      "key": "2758215F-64A6-4D77-B08D-E58AEA1996F4.sonar.cs.scanner.telemetry",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/1/Telemetry.json"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.projectKey",
+      "value": "MiniCloudNote:0C970FEF-0310-4EFD-9431-06355200669D"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.projectName",
+      "value": "MiniCloudNote.Tests"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar/mod2"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.sourceEncoding",
+      "value": "utf-8"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.sources",
+      "value": ""
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.tests",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/coverage.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/obj/MiniCloudNote.Tests.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/bin/Debug/net9.0/MiniCloudNote.Tests.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/bin/Debug/net9.0/MiniCloudNote.Tests.runtimeconfig.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/obj/Debug/net9.0/MiniCloudNote.Tests.sourcelink.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Tests/UnitTest1.cs"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.cs.analyzer.projectOutPaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/2"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.cs.roslyn.reportFilePaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/2/Issues.json"
+    },
+    {
+      "key": "0C970FEF-0310-4EFD-9431-06355200669D.sonar.cs.scanner.telemetry",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/2/Telemetry.json"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.projectKey",
+      "value": "MiniCloudNote:2A3219FF-1749-4378-96F3-4447F266C3BF"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.projectName",
+      "value": "MiniCloudNote.API"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar/mod3"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.sourceEncoding",
+      "value": "utf-8"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.tests",
+      "value": ""
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.sources",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/appsettings.Development.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/appsettings.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Dockerfile,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Dockerfile.dev,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/MiniCloudNote.API.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Properties/launchSettings.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/bin/Debug/net9.0/appsettings.Development.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/bin/Debug/net9.0/appsettings.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/bin/Debug/net9.0/MiniCloudNote.API.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/bin/Debug/net9.0/MiniCloudNote.API.runtimeconfig.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/bin/Debug/net9.0/MiniCloudNote.API.staticwebassets.endpoints.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/MiniCloudNote.API.sourcelink.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/rjsmrazor.dswa.cache.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/rpswa.dswa.cache.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/staticwebassets.build.endpoints.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/staticwebassets.build.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Controllers/AuthController.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Controllers/CacheController.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Controllers/FilesController.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Controllers/JobsController.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Controllers/NotesController.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/ConfigResponse.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/CreateNoteRequest.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/FormatNoteRequest.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/JobAcceptedResponse.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/LoginRequest.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/NoteResponse.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/RegisterRequest.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/DTOs/ServerInfoResponse.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/Program.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/MiniCloudNote.API.GlobalUsings.g.cs,\"/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs\",/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/MiniCloudNote.API.AssemblyInfo.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/obj/Debug/net9.0/MiniCloudNote.API.MvcApplicationPartsAssemblyInfo.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.API/MiniCloudNote.API.http"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.cs.analyzer.projectOutPaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/3"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.cs.roslyn.reportFilePaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/3/Issues.json"
+    },
+    {
+      "key": "2A3219FF-1749-4378-96F3-4447F266C3BF.sonar.cs.scanner.telemetry",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/3/Telemetry.json"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.projectKey",
+      "value": "MiniCloudNote:119F1C01-FA90-439A-A846-8CE8E5466C2A"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.projectName",
+      "value": "MiniCloudNote.UnitTests"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.projectBaseDir",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.working.directory",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/.sonar/mod4"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.sourceEncoding",
+      "value": "utf-8"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.sources",
+      "value": ""
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.tests",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/obj/MiniCloudNote.UnitTests.csproj.nuget.dgspec.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/obj/project.assets.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/appsettings.Development.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/appsettings.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.API.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.API.runtimeconfig.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.API.staticwebassets.endpoints.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.Core.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.Infrastructure.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.UnitTests.deps.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MiniCloudNote.UnitTests.runtimeconfig.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/bin/Debug/net9.0/MvcTestingAppManifest.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/obj/Debug/net9.0/MiniCloudNote.UnitTests.sourcelink.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/obj/Debug/net9.0/MvcTestingAppManifest.json,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/CustomWebApplicationFactory.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/FilesControllerTests.cs,/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.UnitTests/HealthCheckTests.cs"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.cs.analyzer.projectOutPaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.cs.roslyn.reportFilePaths",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4/Issues.json"
+    },
+    {
+      "key": "119F1C01-FA90-439A-A846-8CE8E5466C2A.sonar.cs.scanner.telemetry",
+      "value": "/mnt/c/Personal Project/MiniCloudNote/.sonarqube/out/4/Telemetry.json"
+    },
+    {
+      "key": "sonar.token",
+      "value": "***"
+    },
+    {
+      "key": "sonar.host.url",
+      "value": "http://localhost:9005"
+    },
+    {
+      "key": "sonar.cs.opencover.reportsPaths",
+      "value": "**/coverage.opencover.xml"
+    },
+    {
+      "key": "sonar.exclusions",
+      "value": "**/coverage.opencover.xml"
+    },
+    {
+      "key": "sonar.visualstudio.enable",
+      "value": "false"
+    }
+  ]
+}

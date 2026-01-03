@@ -1,0 +1,19 @@
+{
+p/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/Debug/net9.0/MiniCloudNote.Core.AssemblyInfo.csutf-8á
+|/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.csutf-8}
+r/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/obj/Debug/net9.0/MiniCloudNote.Core.GlobalUsings.g.csutf-8V
+M/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/TaxCalculator.csutf-8]
+T/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/NoteService.csutf-8Ç
+y/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/PlainTextFormattingStrategy.csutf-8Å
+x/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/MarkdownFormattingStrategy.csutf-8}
+t/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/HtmlFormattingStrategy.csutf-8c
+Z/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IUserRepository.csutf-8c
+Z/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IStorageService.csutf-8`
+W/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteService.csutf-8c
+Z/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteRepository.csutf-8`
+W/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/INoteContent.csutf-8g
+^/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IFormattingStrategy.csutf-8a
+X/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IEmailService.csutf-8`
+W/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Interfaces/IAuthService.csutf-8V
+M/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/User.csutf-8V
+M/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/Note.csutf-8

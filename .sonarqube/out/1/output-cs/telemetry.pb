@@ -1,0 +1,1 @@
+€Rj/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Infrastructure/MiniCloudNote.Infrastructure.csproj¢net9.0òCSharp13
