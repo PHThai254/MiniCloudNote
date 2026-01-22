@@ -22,7 +22,7 @@ The goal is to simulate a real-world backend environment where high availability
 - **🔍 Observability**: Centralized logging and monitoring via **Serilog** and **Seq**.
 - **🐳 Containerization**: Full Docker support for "One-click" deployment.
 
-## 🏗 System Architecture
+## 🏗 System Architecture Diagram
 
 The system follows **Clean Architecture** to ensure separation of concerns and testability.
 
@@ -80,6 +80,17 @@ MiniCloudNote/
 ├── docker-compose.yml                # Orchestration for App + DB + Redis + MinIO + Seq
 └── nginx/                            # Reverse Proxy Configuration
 ```
+
+## 🧹 Clean Architecture
+```mermaid
+    graph TD
+    API[MiniCloudNote.API] --> Core[MiniCloudNote.Core]
+    Infrastructure[MiniCloudNote.Infrastructure] --> Core
+    API --> Infrastructure
+    
+    %% Core KHÔNG ĐƯỢC chỉ ngược lại ai cả
+```
+
 ## ⚡ Getting Started
 
 Follow these steps to get **MiniCloudNote** running on your local machine.
