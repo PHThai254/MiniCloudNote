@@ -493,3 +493,18 @@ $RECYCLE.BIN/
 *.sql
 *.dump
 backup_minio_data/
+
+# Ignore appsettings.json to protect secrets
+**/appsettings.json
+**/appsettings.Development.json
+
+# SonarQube generated files
+.sonarqube/
+.scannerwork/
+out/
+**/report-task.txt
+**/*.pb
+**/*.xml
+!src/**/*.xml  # Giữ lại xml trong src nếu có
+!*.csproj
+!*.sln

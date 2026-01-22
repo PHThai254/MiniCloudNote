@@ -1,72 +1,97 @@
-using BCrypt.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using MiniCloudNote.Core.Entities;
+using MiniCloudNote.Core.Entities; // Namespace chứa class User
 using MiniCloudNote.Core.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Identity; // Cần thiết để dùng UserManager
 
 namespace MiniCloudNote.Infrastructure
 {
     public class AuthService : IAuthService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration; // Để đọc Secret Key từ appsettings
+        // Thay IUserRepository bằng UserManager của Identity
+        private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(UserManager<User> userManager, IConfiguration configuration)
         {
-            _userRepository = userRepository;
+            _userManager = userManager;
             _configuration = configuration;
         }
 
-        // 1. Đăng ký: Hash mật khẩu -> Lưu DB
+        // 1. Đăng ký (Dùng Identity để tạo User và Hash mật khẩu chuẩn)
         public async Task<User> RegisterAsync(User user, string password)
         {
-            // Kiểm tra trùng username (nên làm)
-            var existingUser = await _userRepository.GetByUsernameAsync(user.Username);
-            if (existingUser != null) throw new Exception("Username đã tồn tại!");
+            // Hàm CreateAsync này tự động:
+            // - Kiểm tra trùng UserName
+            // - Hash mật khẩu theo chuẩn Identity
+            // - Lưu vào Database
+            var result = await _userManager.CreateAsync(user, password);
 
-            // Hash mật khẩu
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            
-            await _userRepository.AddAsync(user);
+            if (!result.Succeeded)
+            {
+                // Nếu lỗi (ví dụ: pass yếu, trùng tên...), gom lỗi lại và ném ra
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new Exception(errors);
+            }
+
+            // Nếu muốn gán Role mặc định ngay khi đăng ký:
+            // await _userManager.AddToRoleAsync(user, "User");
+
             return user;
         }
 
-        // 2. Đăng nhập: Kiểm tra Hash -> Tạo Token
+        // 2. Đăng nhập (Dùng Identity để kiểm tra mật khẩu)
         public async Task<string?> LoginAsync(string username, string password)
         {
-            // Tìm user
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user == null) return null; // Hoặc throw exception
+            // Tìm user theo UserName
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null) return null;
 
-            // Kiểm tra mật khẩu (So sánh Hash)
-            bool isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
-            if (!isValid) return null;
+            // Kiểm tra mật khẩu (Hàm này tự so sánh Hash của Identity)
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!isPasswordValid) return null;
 
-            // Tạo JWT Token (Cấp vòng tay)
+            // Tạo Token
             return GenerateJwtToken(user);
         }
 
         private string GenerateJwtToken(User user)
         {
-            var secretKey = _configuration["Jwt:Key"] ?? string.Empty; // Lấy từ User Secrets
+            var secretKey = _configuration["Jwt:Key"] ?? string.Empty;
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), // ID người dùng
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim("role", user.Role) // Quyền
+                // QUAN TRỌNG: Phải dùng ClaimTypes.NameIdentifier để khớp với 
+                // User.FindFirstValue(ClaimTypes.NameIdentifier) bên Controller
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                
+                // UserName
+                new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
+                
+                // Email (nếu cần)
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                
+                // UUID cho Token
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            // (Tùy chọn) Nếu sau này dùng Role, lấy Role từ DB thêm vào Token
+            // var roles = await _userManager.GetRolesAsync(user);
+            // foreach (var role in roles)
+            // {
+            //     claims.Add(new Claim(ClaimTypes.Role, role));
+            // }
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1), // Hết hạn sau 1 giờ
+                expires: DateTime.Now.AddHours(1),
                 signingCredentials: creds
             );
 

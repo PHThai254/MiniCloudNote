@@ -1,19 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace MiniCloudNote.Core.Entities
 {
-    public class User
+    // Phải kế thừa IdentityUser<Guid> nếu dùng Guid làm ID
+    // Kế thừa IdentityUser<Guid> nghĩa là nó đã tự có: Id (Guid), UserName, Email, PasswordHash...
+    public class User : IdentityUser<Guid>
     {
-        [Key]
-        public Guid Id { get; set; }
-
-        [Required]
-        [MaxLength(50)]
-        public string Username { get; set; } = string.Empty;
-
-        [Required]
-        public string PasswordHash { get; set; } = string.Empty; // Lưu ý: Hash, không phải Password
-
         [Required]
         [MaxLength(100)]
         public string FullName { get; set; } = string.Empty;

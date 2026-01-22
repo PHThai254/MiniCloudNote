@@ -65,10 +65,10 @@ namespace MiniCloudNote.UnitTests
             var controller = new FilesController(mockStorage.Object);
 
             // Tạo file rỗng
-            IFormFile nullFile = null;
+            IFormFile? nullFile = null;
 
             // === ACT ===
-            var result = await controller.Upload(nullFile);
+            var result = await controller.Upload(nullFile == null ? null! : nullFile);
 
             // === ASSERT ===
             // Mong đợi kết quả là BadRequest (400)

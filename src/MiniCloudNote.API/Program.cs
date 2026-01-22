@@ -17,6 +17,8 @@ using Serilog;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using MiniCloudNote.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +127,19 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 var secretKey = builder.Configuration["Jwt:Key"] ?? "Key_Nay_Chi_Dung_De_Fake_Khi_Build_Thoi_123456"; 
 var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 
+// Đăng ký Identity
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+{
+    // Cấu hình password nếu muốn (ví dụ: không bắt buộc ký tự đặc biệt)
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<AppDbContext>() // Báp cho Identity biết dùng DB nào
+.AddDefaultTokenProviders(); // Để sinh token reset pass, email....
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -160,7 +175,6 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
 builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 var app = builder.Build();
-
 // === TỰ ĐỘNG MIGRATION (Chỉ chạy khi KHÔNG test) ===
 // Khi test ta dùng In-Memory Database nên không cần Migrate kiểu PostgreSQL
 if (!isTesting)

@@ -1,1 +1,0 @@
-lRV/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/MiniCloudNote.Core.csproj¢net9.0òCSharp13
