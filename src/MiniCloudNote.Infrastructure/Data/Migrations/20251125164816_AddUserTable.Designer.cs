@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MiniCloudNote.Infrastructure.Migrations
+namespace MiniCloudNote.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20251125164816_AddUserTable")]

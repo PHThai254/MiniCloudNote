@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MiniCloudNote.Infrastructure.Migrations
+namespace MiniCloudNote.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddUserTable : Migration

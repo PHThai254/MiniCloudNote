@@ -1,16 +1,24 @@
 using MiniCloudNote.Core.Entities;
+using MiniCloudNote.Core.DTOs;
 
 namespace MiniCloudNote.Core.Interfaces
 {
     public interface INoteService
     {
-        // Sửa lại chữ ký: Nhận vào dữ liệu thô, trả về Note (Entity)
-        // Dùng Task<> để làm Bất đồng bộ (Async) - Best practice
-        Task<Note> CreateNoteAsync(string title, string content);
-        Task<IEnumerable<Note>> GetAllNotesAsync();
-        Task<Note?> GetNoteByIdAsync(Guid id);
-        Task UpdateNoteAsync(Guid id, string title, string content);
-        Task DeleteNoteAsync(Guid id);
-        string FormatNoteContent(string content, string formatType);
+        // Lấy danh sách ghi chú của user (trả về DTO NoteResponse)
+        Task<IEnumerable<NoteResponse>> GetUserNotesAsync(Guid userId);
+
+        // Lấy chi tiết 1 ghi chú (Cần userId để đảm bảo chính chủ)
+        Task<NoteResponse?> GetNoteByIdAsync(Guid userId, Guid noteId);
+
+        // Tạo mới
+        Task<NoteResponse> CreateNoteAsync(Guid userId, CreateNoteRequest request);
+
+        // Cập nhật
+        Task<bool> UpdateNoteAsync(Guid noteId, Guid userId, UpdateNoteRequest request);
+
+        // Xóa
+        Task<bool> DeleteNoteAsync(Guid noteId, Guid userId);
+
     }
 }

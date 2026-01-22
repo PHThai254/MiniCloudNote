@@ -3,7 +3,7 @@ using MiniCloudNote.Core.Entities;
 using MiniCloudNote.Core.Interfaces;
 using MiniCloudNote.Infrastructure.Data;
 
-namespace MiniCloudNote.Infrastructure
+namespace MiniCloudNote.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {

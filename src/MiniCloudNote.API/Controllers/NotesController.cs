@@ -1,157 +1,97 @@
-using Microsoft.AspNetCore.Mvc;
-using MiniCloudNote.Core.Interfaces; 
-using MiniCloudNote.Infrastructure; 
-using MiniCloudNote.API.DTOs; 
-using MiniCloudNote.Core.Entities; //Thêm Entity (để Mapping)
-using System.Threading.Tasks; // Thêm Async
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MiniCloudNote.Core.DTOs; // <-- Đã trỏ đúng về Core
+using MiniCloudNote.Core.Interfaces;
+using System.Security.Claims;
 
 namespace MiniCloudNote.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // <--- Dán cái bùa này vào là khóa toàn bộ API trong Controller này
+    [Authorize] // Bắt buộc phải đăng nhập mới dùng được Controller này
     public class NotesController : ControllerBase
     {
-        // 1. Khai báo các dịch vụ (trách nhiệm đã tách)
         private readonly INoteService _noteService;
-        private readonly IConfiguration _configuration;
-        // Bỏ Repository và Email, Controller không cần biết chúng (SRP)
-        //private readonly NoteRepository _noteRepository; // Tạm thời dùng class, bài DIP sẽ dùng Interface
-        //private readonly EmailService _emailService;     // Tạm thời dùng class
 
-        // 2. Tiêm (Inject) dịch vụ vào qua Constructor
-        public NotesController(INoteService noteService, IConfiguration configuration)
+        public NotesController(INoteService noteService)
         {
             _noteService = noteService;
-            _configuration = configuration;
-          
         }
 
-        // 3. Sửa lại hàm CreateNote để dùng Service
-        [HttpPost]
-        public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest request)
+        // --- HÀM TIỆN ÍCH (HELPER METHOD) ---
+        // Lấy User ID từ Token của người đang đăng nhập
+        private Guid GetUserId()
         {
-            try
+            // ClaimTypes.NameIdentifier chính là cái chúng ta đã nhét vào Token lúc Login
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (Guid.TryParse(userIdString, out var userId))
             {
-                // === Controller chỉ còn 1 trách nhiệm: ĐIỀU PHỐI ===
-
-                // 1. Gọi Service (chỉ truyền dữ liệu thô)
-                var newNoteEntity = await _noteService.CreateNoteAsync(request.Title, request.Content);
-
-                // 2. Mapping: Chuyển đổi Entity -> DTO Response
-                var responseDto = new NoteResponse
-                {
-                    Id = newNoteEntity.Id,
-                    Title = newNoteEntity.Title,
-                    Content = newNoteEntity.Content,
-                    CreatedAt = newNoteEntity.CreatedAt
-                };
-
-                // 3. Đổi GetNoteById thành GetById (Tên của hàm GET ở dưới)
-                return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
-                
+                return userId;
             }
-            catch (ArgumentException ex) // Bắt lỗi nghiệp vụ
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex) // Bắt lỗi hệ thống
-            {
-                return StatusCode(500, "Lỗi hệ thống: " + ex.Message);
-            }
+            // Nếu không lấy được ID (Token lỗi hoặc cũ), ném lỗi 401
+            throw new UnauthorizedAccessException("User ID không hợp lệ.");
         }
 
-        // 1. GET: api/Notes (Lấy danh sách)
+        // 1. Lấy danh sách ghi chú của tôi
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetMyNotes()
         {
-            Console.WriteLine("--- TEST HOT RELOAD ---");
-            var notes = await _noteService.GetAllNotesAsync();
+            var userId = GetUserId();
+            var notes = await _noteService.GetUserNotesAsync(userId);
             return Ok(notes);
         }
 
-        // 2. GET: api/Notes/{id} (Lấy 1 cái)
+        // 2. Lấy chi tiết 1 ghi chú
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetNote(Guid id)
         {
-            var note = await _noteService.GetNoteByIdAsync(id);
-            if (note == null) return NotFound("Không tìm thấy ghi chú.");
+            var userId = GetUserId();
+            var note = await _noteService.GetNoteByIdAsync(id, userId);
+            
+            if (note == null) return NotFound(new { message = "Ghi chú không tồn tại hoặc bạn không có quyền truy cập." });
+            
             return Ok(note);
         }
 
-        // 3. PUT: api/Notes/{id} (Sửa)
+        // 3. Tạo ghi chú mới
+        [HttpPost]
+        public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = GetUserId();
+            // Truyền UserId vào để Service biết ai là chủ
+            var createdNote = await _noteService.CreateNoteAsync(userId, request);
+
+            // Trả về 201 Created kèm theo Link để xem chi tiết ghi chú vừa tạo
+            return CreatedAtAction(nameof(GetNote), new { id = createdNote.Id }, createdNote);
+        }
+
+        // 4. Cập nhật ghi chú
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CreateNoteRequest request)
+        public async Task<IActionResult> UpdateNote(Guid id, [FromBody] UpdateNoteRequest request)
         {
-            try 
-            {
-                await _noteService.UpdateNoteAsync(id, request.Title, request.Content);
-                return NoContent(); // 204 No Content (Chuẩn khi update thành công)
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("Không tìm thấy ghi chú để sửa.");
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = GetUserId();
+            var isUpdated = await _noteService.UpdateNoteAsync(id, userId, request);
+
+            if (!isUpdated) return NotFound(new { message = "Không tìm thấy ghi chú để cập nhật." });
+
+            return Ok(new { message = "Cập nhật thành công!" });
         }
 
-        // 4. DELETE: api/Notes/{id} (Xóa)
+        // 5. Xóa ghi chú
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteNote(Guid id)
         {
-            try
-            {
-                await _noteService.DeleteNoteAsync(id);
-                return NoContent(); // 204 No Content
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("Không tìm thấy ghi chú để xóa.");
-            }
-        }
-        
-        [HttpPost("format")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        public IActionResult FormatNote([FromBody] FormatNoteRequest request)
-        {
-            // Controller gọi Service (tuân thủ SRP)
-            var formattedContent = _noteService.FormatNoteContent(request.Content, request.FormatType);
-            return Ok(formattedContent);
-        }
+            var userId = GetUserId();
+            var isDeleted = await _noteService.DeleteNoteAsync(id, userId);
 
-        // 4. Thêm API kiểm tra cấu hình (Test nhanh)
-        [HttpGet("config-test")]
-        [ProducesResponseType(typeof(ConfigResponse), StatusCodes.Status200OK)]
-        public IActionResult GetConfig()
-        {
-            // Đọc giá trị "MyName" từ file json
-            var myName = _configuration["MyName"];
+            if (!isDeleted) return NotFound(new { message = "Không tìm thấy ghi chú để xóa." });
 
-            // Đọc chuỗi kết nối (để xem nó có lấy đúng từ User Secrets không)
-            var connStr = _configuration.GetConnectionString("DefaultConnection");
-
-            return Ok(new ConfigResponse
-            {
-                EnvironmentName = myName + " - Test Override Day 19", 
-                ConnectionString = connStr ?? ""
-            });
-        }
-
-        // 5. Thêm API trả vể tên server (Test nhanh)
-        [HttpGet("who-am-i")]
-        [AllowAnonymous] // Cho phép ai cũng gọi được để test cho nhanh
-        [ProducesResponseType(typeof(ServerInfoResponse), StatusCodes.Status200OK)]
-        public IActionResult WhoAmI()
-        {
-            // Lấy tên máy (Trong Docker nó là Container ID)
-            var serverName = Environment.MachineName;
-    
-            return Ok(new ServerInfoResponse
-            { 
-                Message = "Xin chào! Tôi là nhân viên phục vụ bạn.",
-                ServerId = serverName 
-            });
+            return Ok(new { message = "Xóa thành công!" });
         }
     }
 }

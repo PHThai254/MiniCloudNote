@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity; // Cần thiết để dùng UserManager
 
-namespace MiniCloudNote.Infrastructure
+namespace MiniCloudNote.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {

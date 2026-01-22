@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MiniCloudNote.API.DTOs
+namespace MiniCloudNote.Core.DTOs
 {
     public class ChangePasswordRequest
     {

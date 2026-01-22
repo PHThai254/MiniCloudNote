@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-
-namespace MiniCloudNote.API.DTOs
+namespace MiniCloudNote.Core.DTOs
 {
-    public class LoginRequest
+    public class RegisterRequest
     {
         [Required]
         [MaxLength(50)]
@@ -10,6 +9,9 @@ namespace MiniCloudNote.API.DTOs
 
         [Required]
         public string Password { get; set; } = string.Empty; 
- 
+
+        [Required]
+        [MaxLength(100)]
+        public string FullName { get; set; } = string.Empty;
     }
 }

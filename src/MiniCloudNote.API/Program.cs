@@ -1,7 +1,7 @@
 using MiniCloudNote.Core.Interfaces;
-using MiniCloudNote.Core.Services;
-using MiniCloudNote.Core.Services.FormattingStrategies;
-using MiniCloudNote.Infrastructure;
+using MiniCloudNote.Infrastructure.Services;
+using MiniCloudNote.Infrastructure.Repositories;
+using MiniCloudNote.Infrastructure.Services.FormattingStrategies;
 using Microsoft.EntityFrameworkCore;
 using MiniCloudNote.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

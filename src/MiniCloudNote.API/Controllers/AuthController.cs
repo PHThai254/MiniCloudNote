@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using MiniCloudNote.API.DTOs;
+using MiniCloudNote.Core.DTOs;
 using MiniCloudNote.Core.Entities;
 using MiniCloudNote.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization; 

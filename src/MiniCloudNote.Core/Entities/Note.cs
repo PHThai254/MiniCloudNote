@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations; // Cần cho [Key]
+using System; // Cần cho Guid và DateTime
+using System.ComponentModel.DataAnnotations.Schema; // Cần cho [ForeignKey]
 using MiniCloudNote.Core.Interfaces; 
 
 namespace MiniCloudNote.Core.Entities
@@ -17,7 +19,12 @@ namespace MiniCloudNote.Core.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Thời gian tạo ghi chú
         public DateTime? UpdatedAt { get; set; } // Thời gian cập nhật ghi chú, có thể null
 
-        // TODO: Sẽ thêm UserId ở đây khi làm về Auth
-        
+        // Khóa ngoại lưu ID của user tạo ghi chú
+        public Guid OwnerId { get; set; }
+
+        // Navigation property: Giúp EF Core hiểu mối quan hệ và join bảng dễ dàng
+        // "virtual" để hỗ trợ lazy loading nếu sau này cần
+        [ForeignKey("OwnerId")]
+        public virtual User? Owner { get; set; }
     }
 }

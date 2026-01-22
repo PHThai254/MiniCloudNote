@@ -1,7 +1,7 @@
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using MiniCloudNote.Core.Interfaces;
-using MiniCloudNote.API.DTOs;
+using MiniCloudNote.Core.DTOs;
 
 
 namespace MiniCloudNote.API.Controllers

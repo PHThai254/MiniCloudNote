@@ -2,7 +2,7 @@ using MiniCloudNote.Core.Interfaces; // Nhớ dòng using này để thấy Inte
 using System;
 using System.Threading.Tasks;
 
-namespace MiniCloudNote.Infrastructure
+namespace MiniCloudNote.Infrastructure.Services
 {
     // Thêm ": IEmailService" vào sau tên class để thực hiện kế thừa
     public class EmailService : IEmailService

@@ -1,4 +1,4 @@
-namespace MiniCloudNote.API.DTOs
+namespace MiniCloudNote.Core.DTOs
 {
     public class ServerInfoResponse
     {

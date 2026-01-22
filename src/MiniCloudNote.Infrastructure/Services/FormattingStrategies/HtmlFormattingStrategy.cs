@@ -1,6 +1,6 @@
 using MiniCloudNote.Core.Interfaces;
 
-namespace MiniCloudNote.Core.Services.FormattingStrategies
+namespace MiniCloudNote.Infrastructure.Services.FormattingStrategies
 {
     public class HtmlFormattingStrategy : IFormattingStrategy
     {

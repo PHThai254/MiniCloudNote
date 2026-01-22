@@ -1,4 +1,4 @@
-namespace MiniCloudNote.API.DTOs
+namespace MiniCloudNote.Core.DTOs
 {
     // Hàm định dạng dữ liệu để nhận request
     public class FormatNoteRequest

@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MiniCloudNote.Infrastructure.Migrations
+namespace MiniCloudNote.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateIdentityUser : Migration
