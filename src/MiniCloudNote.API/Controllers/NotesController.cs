@@ -34,11 +34,12 @@ namespace MiniCloudNote.API.Controllers
         }
 
         // 1. Lấy danh sách ghi chú của tôi
+        // GET: api/Notes?pageIndex=1&pageSize=10&searchTerm=abc&sortBy=created_desc
         [HttpGet]
-        public async Task<IActionResult> GetMyNotes()
+        public async Task<IActionResult> GetMyNotes([FromQuery] NoteQueryParameters query)
         {
             var userId = GetUserId();
-            var notes = await _noteService.GetUserNotesAsync(userId);
+            var notes = await _noteService.GetUserNotesAsync(userId, query);
             return Ok(notes);
         }
 

@@ -14,14 +14,14 @@ namespace MiniCloudNote.Infrastructure.Services
             _noteRepository = noteRepository;
         }
 
-        // 1. Lấy danh sách ghi chú của User
-        public async Task<IEnumerable<NoteResponse>> GetUserNotesAsync(Guid userId)
+       // 1. Lấy danh sách ghi chú (ĐÃ NÂNG CẤP PHÂN TRANG)
+        public async Task<PagedResult<NoteResponse>> GetUserNotesAsync(Guid userId, NoteQueryParameters query)
         {
-            // Gọi Repo lấy Entity
-            var notes = await _noteRepository.GetAllByOwnerIdAsync(userId);
+            // Gọi Repository để lấy dữ liệu đã phân trang & lọc từ DB
+            var pagedData = await _noteRepository.GetPagedAsync(userId, query);
             
             // Map từ Entity -> Response DTO (Ẩn thông tin nhạy cảm)
-            return notes.Select(n => new NoteResponse
+            var noteResponses = pagedData.Items.Select(n => new NoteResponse
             {
                 Id = n.Id,
                 Title = n.Title,
@@ -29,8 +29,17 @@ namespace MiniCloudNote.Infrastructure.Services
                 CreatedAt = n.CreatedAt,
                 UpdatedAt = n.UpdatedAt
             });
-        }
 
+            // Đóng gói lại vào PagedResult dành cho DTO
+            return new PagedResult<NoteResponse>
+            {
+                Items = noteResponses,
+                TotalCount = pagedData.TotalCount,
+                PageIndex = pagedData.PageIndex,
+                PageSize = pagedData.PageSize
+            };
+        }
+        
         // 2. Lấy chi tiết 1 ghi chú (Có kiểm tra quyền sở hữu)
         public async Task<NoteResponse?> GetNoteByIdAsync(Guid noteId, Guid userId)
         {

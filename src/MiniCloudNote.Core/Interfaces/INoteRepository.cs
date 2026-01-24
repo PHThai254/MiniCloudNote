@@ -1,5 +1,6 @@
 using MiniCloudNote.Core.Entities;
 using System.Threading.Tasks;
+using MiniCloudNote.Core.DTOs;
 
 namespace MiniCloudNote.Core.Interfaces
 {
@@ -8,16 +9,19 @@ namespace MiniCloudNote.Core.Interfaces
        // Lấy 1 ghi chú theo ID
         Task<Note?> GetByIdAsync(Guid id);
 
-        // Lấy danh sách ghi chú của MỘT user cụ thể (Quan trọng!)
+        // Lấy danh sách ghi chú của MỘT user cụ thể
         Task<IEnumerable<Note>> GetAllByOwnerIdAsync(Guid ownerId);
 
-        // Thêm ghi chú mới (Create): Tạo ghi chú mới trong hệ thống - Như mua hàng mới
+        // Lấy danh sách phân trang
+        Task<PagedResult<Note>> GetPagedAsync(Guid ownerId, NoteQueryParameters query);
+
+        // Thêm ghi chú mới (Trả về Note để lấy được ID vừa sinh ra)
         Task<Note> AddAsync(Note note);
 
-        // Cập nhật ghi chú (Update): Ghi đè nội dung cũ  - Như đổi hàng đã mua
+        // Cập nhật ghi chú
         Task UpdateAsync(Note note);
 
-        // Xóa (Delete): Vứt bỏ ghi chú không cần thiết - Như bỏ đồ thừa
+        // Xóa ghi chú
         Task DeleteAsync(Note note);
     }
 }

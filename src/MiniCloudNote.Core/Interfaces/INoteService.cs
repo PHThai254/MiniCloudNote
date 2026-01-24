@@ -6,7 +6,7 @@ namespace MiniCloudNote.Core.Interfaces
     public interface INoteService
     {
         // Lấy danh sách ghi chú của user (trả về DTO NoteResponse)
-        Task<IEnumerable<NoteResponse>> GetUserNotesAsync(Guid userId);
+        Task<PagedResult<NoteResponse>> GetUserNotesAsync(Guid userId, NoteQueryParameters query);
 
         // Lấy chi tiết 1 ghi chú (Cần userId để đảm bảo chính chủ)
         Task<NoteResponse?> GetNoteByIdAsync(Guid userId, Guid noteId);
