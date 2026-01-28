@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Amazon.S3;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Logging.LogProviders;
@@ -120,6 +119,7 @@ builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 // JWT Authentication
 // Lưu ý: Khi chạy trên GitHub Actions, nó không có User Secrets nên dòng dưới có thể null
@@ -158,21 +158,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
     };
 });
-
-// MinIO Config
-var minioConfig = new AmazonS3Config
-{
-    ServiceURL = "http://localhost:9000",
-    ForcePathStyle = true,
-    UseHttp = true
-};
-builder.Services.AddSingleton<IAmazonS3>(sp => 
-    new AmazonS3Client(
-        builder.Configuration["Minio:AccessKey"] ?? "admin", // Fallback tránh null
-        builder.Configuration["Minio:SecretKey"] ?? "password", 
-        minioConfig
-    ));
-builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 var app = builder.Build();
 // === TỰ ĐỘNG MIGRATION (Chỉ chạy khi KHÔNG test) ===

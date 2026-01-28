@@ -16,7 +16,6 @@ namespace MiniCloudNote.Infrastructure.Repositories
             _context = context;
         }
 
-      
         // Dùng FindAsync để tìm ghi chú theo ID (Nhanh và gọn)
         public async Task<Note?> GetByIdAsync(Guid id)
         {

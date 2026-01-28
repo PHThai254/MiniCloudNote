@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniCloudNote.Core.DTOs; // <-- Đã trỏ đúng về Core
@@ -12,10 +13,12 @@ namespace MiniCloudNote.API.Controllers
     public class NotesController : ControllerBase
     {
         private readonly INoteService _noteService;
+        private readonly IStorageService _storageService;
 
-        public NotesController(INoteService noteService)
+        public NotesController(INoteService noteService, IStorageService storageService)
         {
             _noteService = noteService;
+            _storageService = storageService;
         }
 
         // --- HÀM TIỆN ÍCH (HELPER METHOD) ---
@@ -44,6 +47,7 @@ namespace MiniCloudNote.API.Controllers
         }
 
         // 2. Lấy chi tiết 1 ghi chú
+        // GET: api/Notes/id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNote(Guid id)
         {
@@ -94,5 +98,60 @@ namespace MiniCloudNote.API.Controllers
 
             return Ok(new { message = "Xóa thành công!" });
         }
+        // 6. Upload file
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")] // Bắt buộc dòng này để nhận file
+        public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
+        {
+            // Lấy ruột ra
+            var file = request.File; 
+
+            // 1. Kiểm tra rỗng
+            if (file == null || file.Length == 0) 
+                return BadRequest("Vui lòng chọn file để upload.");
+
+            // === NÂNG CẤP BẢO MẬT: KIỂM TRA ĐUÔI FILE ===
+            // Lấy đuôi file và chuyển về chữ thường (ví dụ: .JPG -> .jpg)
+            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+            
+            // Danh sách đuôi cho phép
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("Chỉ chấp nhận file ảnh (.jpg, .jpeg, .png, .gif).");
+            }
+            // ===============================================
+
+            // 2. Kiểm tra MIME Type (Lớp bảo vệ thứ 2)
+            if (!file.ContentType.StartsWith("image/"))
+                return BadRequest("Nội dung file không phải là hình ảnh hợp lệ.");
+
+            // 3. Kiểm tra dung lượng (5MB)
+            if (file.Length > 5 * 1024 * 1024)
+                return BadRequest("File quá lớn (tối đa 5MB).");
+
+            try
+            {
+                // 2. Mở Stream để đọc file
+                using var stream = file.OpenReadStream();
+
+                // 3. Gọi Service đẩy lên MinIO
+                var fileName = await _storageService.UploadFileAsync(file.FileName, stream, file.ContentType);
+
+                // 4. Trả về đường dẫn (hoặc tên file) cho Client
+                // Client sẽ dùng tên này để nhét vào field "Content" của Note (ví dụ: ![img](fileName))
+                return Ok(new { FileName = fileName, Message = "Upload thành công!" });      
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi upload: {ex.Message}");
+            }
+        }
+    }
+    // Class dùng để hứng dữ liệu upload
+    public class UploadFileRequest
+    {
+        public IFormFile? File { get; set; } 
     }
 }
