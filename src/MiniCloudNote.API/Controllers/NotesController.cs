@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using MiniCloudNote.Core.DTOs; // <-- Đã trỏ đúng về Core
 using MiniCloudNote.Core.Interfaces;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.Json; // Để dùng IEnumerable
 
 namespace MiniCloudNote.API.Controllers
 {
@@ -14,11 +18,13 @@ namespace MiniCloudNote.API.Controllers
     {
         private readonly INoteService _noteService;
         private readonly IStorageService _storageService;
+        private readonly IDistributedCache _cache;
 
-        public NotesController(INoteService noteService, IStorageService storageService)
+        public NotesController(INoteService noteService, IStorageService storageService, IDistributedCache cache)
         {
             _noteService = noteService;
             _storageService = storageService;
+            _cache = cache;
         }
 
         // --- HÀM TIỆN ÍCH (HELPER METHOD) ---
@@ -42,7 +48,48 @@ namespace MiniCloudNote.API.Controllers
         public async Task<IActionResult> GetMyNotes([FromQuery] NoteQueryParameters query)
         {
             var userId = GetUserId();
+            // TẠO CACHE KEY ĐỘC NHẤT
+            // Key phải bao gồm UserID + Page + Search + Sort để tránh nhầm lẫn giữa các trang
+            // Ví dụ key: "notes:guid-123:search-abc:sort-date:p-1:s-10"
+            string cacheKey = $"note:{userId}:{query.SearchTerm}:{query.SortBy}:{query.PageIndex}:{query.PageSize}";
+            // KIỂM TRA REDIS
+            try
+            {
+                var cachedData = await _cache.GetAsync(cacheKey);
+                if (cachedData != null)
+                {
+                    // HIT CACHE: Có dữ liệu trong RAM -> Trả về luôn (Siêu nhanh)
+                    var jsonString = Encoding.UTF8.GetString(cachedData);
+
+                    // Lưu ý: Deserialize đúng kiểu dữ liệu trả về của Service (thường là IEnumerable<NoteDto> hoặc PagedResult)
+                    var cachedNotes = JsonSerializer.Deserialize<IEnumerable<NoteResponse>>(jsonString);
+                    return Ok(cachedNotes);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Nếu Redis chết, log lỗi nhưng KHÔNG ĐƯỢC làm sập App
+                // Vẫn cho chạy tiếp xuống DB để lấy dữ liệu (Fallback)
+                Console.WriteLine($"--> Redis Error: {ex.Message}");
+            }
+
+            // MISS CACHE -> GỌI DATABASE
             var notes = await _noteService.GetUserNotesAsync(userId, query);
+
+            // LƯU VÀO REDIS (SỐNG 60 GIÂY)
+            try
+            {
+                var cacheOptions = new DistributedCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(60)) // Hết hạn cứng sau 60s
+                    .SetSlidingExpiration(TimeSpan.FromSeconds(30)); // Nếu có người xem liên tục thì gia hạn thêm 30s
+
+                var jsonToCache = JsonSerializer.Serialize(notes);
+                await _cache.SetAsync(cacheKey, Encoding.UTF8.GetBytes(jsonToCache), cacheOptions);
+            }
+            catch
+            {
+                // Lỗi lưu cache thì bỏ qua
+            }
             return Ok(notes);
         }
 

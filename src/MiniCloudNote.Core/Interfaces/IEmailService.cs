@@ -3,6 +3,8 @@ namespace MiniCloudNote.Core.Interfaces
 {
     public interface IEmailService
     {
-        Task SendWelcomeEmailAsync(string email, string name);
+        // Hàm gửi email tổng quát (nhận Email, Tiêu đề, Nội dung)
+        // Để khớp với lệnh gọi trong AuthController
+        Task SendEmailAsync(string toEmail, string subject, string body);
     }
 }

@@ -223,6 +223,14 @@ else
 }
 
 app.MapControllers();
+
+// --- LẬP LỊCH TỰ ĐỘNG (RECURRING JOB) ---
+if (!isTesting)
+{
+    // Cron.Minutely: Chạy mỗi phút 1 lần (để test cho nhanh)
+    RecurringJob.AddOrUpdate("system-report", () => Console.WriteLine("--> [REPORT] System is running healthy..."), Cron.Minutely);
+}
+
 await app.RunAsync();
 
 // Dòng này bắt buộc để Integration Test nhìn thấy

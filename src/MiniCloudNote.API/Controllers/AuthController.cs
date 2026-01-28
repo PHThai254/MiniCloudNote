@@ -5,6 +5,7 @@ using MiniCloudNote.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization; 
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Hangfire;
 
 namespace MiniCloudNote.API.Controllers
 {
@@ -14,11 +15,13 @@ namespace MiniCloudNote.API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public AuthController(IAuthService authService, UserManager<User> userManager)
+        public AuthController(IAuthService authService, UserManager<User> userManager, IEmailService emailService)
         {
             _authService = authService;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -30,10 +33,21 @@ namespace MiniCloudNote.API.Controllers
                 {
                     Id = Guid.NewGuid(),
                     UserName = request.Username,
-                    FullName = request.FullName
+                    FullName = request.FullName,
+                    Email = request.Email 
                 };
 
+                // Đăng ký User vào DB (việc này vẫn phải chờ)
                 var createdUser = await _authService.RegisterAsync(newUser, request.Password);
+
+                // FILE-AND-FORGET: Bắn Job gửi email vào hàng đợi rồi trả về OK ngay lập tức
+                // Server không cần chờ gửi mail xong mới phản hồi User -> API nhanh hơn hẳn
+                BackgroundJob.Enqueue(() => _emailService.SendEmailAsync(
+                    request.Email,
+                    "Welcome to MiniCloudNote",
+                    $"Xin chào {request.FullName}, chúc mừng bạn đã đăng ký thành công!"
+                ));
+                
                 return Ok(new { message = "Đăng ký thành công!", userId = createdUser.Id });
             }
             catch (Exception ex)

@@ -10,16 +10,18 @@ namespace MiniCloudNote.API.Controllers
     [ApiController]
     public class JobsController : ControllerBase
     {
-        // Lưu ý: Không cần Inject IEmailService vào Constructor để gọi trực tiếp
-        // Hangfire sẽ tự lo việc đó lúc chạy ngầm.
-
+        // API này dùng để test bắn Job thủ công (nếu muốn)
         [HttpPost("welcome-email")]
-        [ProducesResponseType(typeof(JobAcceptedResponse), StatusCodes.Status200OK)]
         public IActionResult SendWelcomeEmail(string email, string name)
         {
             // === FIRE-AND-FORGET (Bắn và Quên) ===
             // Dòng này sẽ trả về ID của Job ngay lập tức, không chờ 5 giây
-            var jobId = BackgroundJob.Enqueue<IEmailService>(x => x.SendWelcomeEmailAsync(email, name));
+            var jobId = BackgroundJob.Enqueue<IEmailService>(x => 
+            x.SendEmailAsync(
+                email,
+                "Welcome to MiniCloudNote",
+                $"Xin chào {name}, đây là email test từ Hangfire!"
+            ));
 
             return Ok(new JobAcceptedResponse
             { 
