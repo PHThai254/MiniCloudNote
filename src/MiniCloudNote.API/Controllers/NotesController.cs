@@ -148,6 +148,24 @@ namespace MiniCloudNote.API.Controllers
                 return StatusCode(500, $"Lỗi upload: {ex.Message}");
             }
         }
+        // 7. Hàm để Frontend gọi vào xin link
+        // GET: api/Notes/file/ten-file-dai-ngoang.jpg
+        [HttpGet("file/{fileName}")]
+        public async Task<IActionResult> GetFileUrl(string fileName)
+        {
+            try
+            {
+                // Gọi Service lấy link
+                var url = await _storageService.GetFileUrlAsync(fileName);
+
+                // Trả về link cho Client
+                return Ok(new { Url = url });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi lấy link ảnh: {ex.Message}");
+            }
+        }
     }
     // Class dùng để hứng dữ liệu upload
     public class UploadFileRequest

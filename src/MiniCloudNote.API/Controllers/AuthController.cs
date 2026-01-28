@@ -4,7 +4,6 @@ using MiniCloudNote.Core.Entities;
 using MiniCloudNote.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization; 
 using System.Security.Claims;
-using Amazon.S3.Model;
 using Microsoft.AspNetCore.Identity;
 
 namespace MiniCloudNote.API.Controllers

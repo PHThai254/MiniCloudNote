@@ -60,10 +60,19 @@ namespace MiniCloudNote.Infrastructure.Services
             return uniqueFileName;
         }
 
-        public Task<string> GetFileUrlAsync(string fileName)
+        public async Task<string> GetFileUrlAsync(string fileName)
         {
-            // Tạm thời chưa cần implement, trả về empty
-             return Task.FromResult("");
+            // Kiểm tra tên file có hợp lệ không
+            if (string.IsNullOrEmpty(fileName)) return string.Empty;
+
+            // Tạo yêu cầu lấy link (Presigned URL)
+            var args = new PresignedGetObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(fileName)
+                .WithExpiry(60 * 60); // Link sống trong 3600 giây (1 tiếng)
+
+            // MinIO sẽ ký tên vào link này
+            return await _minioClient.PresignedGetObjectAsync(args);
         }
 
         public Task DeleteFileAsync(string fileName)
