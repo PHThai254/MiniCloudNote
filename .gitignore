@@ -497,6 +497,7 @@ backup_minio_data/
 # Ignore appsettings.json to protect secrets
 **/appsettings.json
 **/appsettings.Development.json
+**/appsettings.Production.json
 
 # SonarQube generated files
 .sonarqube/
