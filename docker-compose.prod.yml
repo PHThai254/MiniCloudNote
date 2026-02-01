@@ -1,43 +1,54 @@
-
 services:
-  nginx:
-    # image: nginx:alpine
-    container_name: minicloud-nginx
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    ports:
-      - "80:80" # Cổng HTTP cũ (để chuyển hướng)
-      - "443:443" # Cổng HTTPS mới (Mở thêm cái này)
-    depends_on:
-      - api
+  # 1. Database (PostgreSQL)
+  postgres:
+    image: postgres:15
+    container_name: minicloud-postgres-prod
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: minicloud_prod_db
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
     networks:
-      - minicloud-network # Chung phòng họp với API
+      - minicloud-network
     restart: always
 
-  # Database cho Prod (Thực tế sẽ dùng DB riêng, nhưng ở đây ta dùng chung image cho tiện)
-  db:
+  # 2. Redis Cache (MỚI THÊM - Bắt buộc cho Hangfire)
+  redis:
+    image: redis:alpine
+    container_name: minicloud-redis-prod
+    networks:
+      - minicloud-network
     restart: always
-    # Ở Prod, ta KHÔNG mở cổng 5432 ra ngoài máy thật để bảo mật
-    # Chỉ các container trong mạng nội bộ mới gọi được nhau
-    # ports: 
-    #   - "5432:5432"  <-- Comment dòng này lại
 
+  # 3. Main Application (.NET API)
   api:
-    # container_name: minicloud-api-prod
+    container_name: minicloud-api-prod
     build:
       context: .
-      dockerfile: src/MiniCloudNote.API/Dockerfile # <--- Dùng file Dockerfile GỐC (Multi-stage, siêu nhẹ)
+      dockerfile: Dockerfile # <--- Trỏ đúng file Dockerfile ở thư mục gốc
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production # <--- Chế độ Chạy thật
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
-      - Jwt__Key=${JWT_KEY}
-      - Jwt__Issuer=${JWT_ISSUER}
-      - Jwt__Audience=${JWT_AUDIENCE}
-    #ports:
-    # - "9090:8080" # Mở cổng 9090 (để không đụng hàng với cổng 8080 của Dev)
-    # KHÔNG map volume code (.:/app) -> Code được đóng gói cứng trong Image
-
-    expose: 
-      - "8080" # Chỉ mở hé cho NGINX (cùng mạng) nhìn thấy
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Kết nối DB dùng tên service "postgres"
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=minicloud_prod_db;Username=postgres;Password=password123
+      # Kết nối Redis dùng tên service "redis"
+      - ConnectionStrings__RedisConnection=redis:6379
+    ports:
+      - "5000:8080" # Map ra cổng 5000 để bạn test luôn
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - minicloud-network
     restart: always
+
+  # --- TẠM ẨN NGINX (Sẽ bật lại sau khi có config) ---
+  # nginx:
+  #   container_name: minicloud-nginx
+  #   ...
+
+volumes:
+  pgdata_prod:
+
+networks:
+  minicloud-network:
