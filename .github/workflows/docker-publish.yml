@@ -1,0 +1,50 @@
+name: Docker Build & Publish
+
+# 1. KÍCH HOẠT KHI NÀO?
+on:
+  push:
+    branches: [ "main" ] # Chỉ chạy khi push vào nhánh main
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # Mượn một máy Ubuntu của GitHub để chạy
+
+    steps:
+    # BƯỚC 1: Lấy code về máy ảo
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # BƯỚC 2: Cài đặt .NET (Để chạy Test)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # BƯỚC 3: Chạy Test (Quan trọng! Test lỗi là dừng ngay)
+    # Chúng ta dùng file .sln để nó tự tìm project test
+    - name: Test with dotnet
+      run: dotnet test MiniCloudNote.sln
+
+    # BƯỚC 4: Đăng nhập vào Docker Hub (Dùng bí mật đã lưu)
+    - name: Login to Docker Hub
+      if: github.event_name != 'pull_request' # Chỉ login khi push thật, không login khi pull request
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # BƯỚC 5: Build và Đẩy Image lên Docker Hub
+    - name: Build and push Docker image
+      if: github.event_name != 'pull_request'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        # Thay 'tencuaban' bằng username Docker Hub của bạn
+        # Tags: latest là bản mới nhất, ${{ github.sha }} là mã commit (để sau này rollback được)
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/minicloudnote-api:latest
+          ${{ secrets.DOCKER_USERNAME }}/minicloudnote-api:${{ github.sha }}
