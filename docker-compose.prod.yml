@@ -33,11 +33,30 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=minicloud_prod_db;Username=postgres;Password=password123
       # Kết nối Redis dùng tên service "redis"
       - ConnectionStrings__RedisConnection=redis:6379
-    ports:
-      - "5000:8080" # Map ra cổng 5000 để bạn test luôn
+      # ports:
+      #- "5000:8080" # Trong Production, ta sẽ không mở cổng trực tiếp, mà dùng Nginx làm Reverse Proxy (Tức là chỉ Nginx (cùng mạng) mới gọi được nó.)
+    expose:
+      - "8080"
     depends_on:
       - postgres
       - redis
+    networks:
+      - minicloud-network
+    restart: always
+
+  # 4. NGINX 
+  nginx:
+    image: nginx:alpine
+    container_name: minicloud-nginx
+    ports:
+      - "80:80" # Mở cổng 80 (Web chuẩn) ra thế giới
+      - "443:443" # Mở cổng 443 (Web bảo mật) ra thế giới
+    volumes:
+      # Nạp cuốn sổ tay cấu hình vào cho Nginx đọc
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api # Phải đợi API dậy thì Lễ tân mới làm việc
     networks:
       - minicloud-network
     restart: always
