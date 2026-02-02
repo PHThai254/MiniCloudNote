@@ -13,7 +13,7 @@ services:
       - minicloud-network
     restart: always
 
-  # 2. Redis Cache (MỚI THÊM - Bắt buộc cho Hangfire)
+  # 2. Redis Cache (Bắt buộc cho Hangfire)
   redis:
     image: redis:alpine
     container_name: minicloud-redis-prod
@@ -23,6 +23,7 @@ services:
 
   # 3. Main Application (.NET API)
   api:
+    image: thai254/minicloudnote-api:latest 
     container_name: minicloud-api-prod
     build:
       context: .
@@ -44,7 +45,7 @@ services:
       - minicloud-network
     restart: always
 
-  # 4. NGINX 
+  # 4. NGINX Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: minicloud-nginx
@@ -61,10 +62,22 @@ services:
       - minicloud-network
     restart: always
 
-  # --- TẠM ẨN NGINX (Sẽ bật lại sau khi có config) ---
-  # nginx:
-  #   container_name: minicloud-nginx
-  #   ...
+  # 5. watchtower (TỰ ĐỘNG UPDATE DOCKER IMAGE KHI CÓ BẢN MỚI)
+  watchtower:
+    image: containrrr/watchtower
+    container_name: minicloud-watchtower
+    volumes:
+      # Cho phép Watchtower điều khiển Docker của máy chủ
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # Tự động xóa Image cũ cho đỡ rác máy
+      - WATCHTOWER_CLEANUP=true
+      # Kiểm tra cập nhật mỗi 30 giây (Mặc địch là 24h - quá lâu cho Demo)
+      - WATCHTOWER_POLL_INTERVAL=30
+      - DOCKER_API_VERSION=1.45
+    networks:
+      - minicloud-network
+    restart: always
 
 volumes:
   pgdata_prod:
