@@ -41,7 +41,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: ./backend
-        file: ./Dockerfile
+        file: ./backend/Dockerfile
         push: true
         # Thay 'tencuaban' bằng username Docker Hub của bạn
         # Tags: latest là bản mới nhất, ${{ github.sha }} là mã commit (để sau này rollback được)

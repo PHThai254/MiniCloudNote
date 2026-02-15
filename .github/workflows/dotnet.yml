@@ -14,6 +14,10 @@ jobs:
     # Thuê máy chủ Ubuntu miễn phí của GitHub
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./backend # Đặt thư mục làm việc mặc định là backend (nơi có code .NET)
+
     steps:
     # 1. Kéo code từ kho chứa về máy ảo
     - uses: actions/checkout@v4
