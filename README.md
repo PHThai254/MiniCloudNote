@@ -1,19 +1,22 @@
 # Mini Cloud Note 📝
 
 ![Build Status](https://img.shields.io/badge/Build-Passing-success)
-![.NET](https://img.shields.io/badge/.NET-9.0-purple)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-![Architecture](https://img.shields.io/badge/Architecture-Clean-green)
+![.NET](https://img.shields.io/badge/Backend-.NET%209.0-purple)
+![Flutter](https://img.shields.io/badge/Frontend-Flutter%203.x-02569B)
+![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%20BLoC-green)
+![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED)
 
-**Mini Cloud Note** is a scalable, secure, and production-ready backend system designed for personal knowledge management. It supports rich-text notes and file attachments (images, documents), built with strict adherence to **Software Engineering Principles** (SOLID, DRY) and **Clean Architecture**.
+**Mini Cloud Note** is a comprehensive, cross-platform personal knowledge management system. It features a robust **.NET Backend** following Clean Architecture and a responsive **Flutter Frontend** (Mobile & Web) using the BLoC pattern.
 
-This repository represents a continuous journey of mastering modern Backend technologies, moving from a coding challenge to a fully deployable system with a comprehensive DevOps pipeline.
+This repository is organized as a **Monorepo**, representing a continuous journey of mastering full-stack software engineering, from low-level backend optimization to high-level UI/UX state management.
 
 ## 🚀 Project Overview
 
-The goal is to simulate a real-world backend environment where high availability, security, and maintainability are priorities.
+The goal is to build a production-ready system that seamlessly syncs notes across devices while maintaining strict security and high performance.
 
-### Key Features
+🌟 **Key Features**
+
+🛡️ **Backend (.NET Core)**
 - **🔐 Advanced Authentication**: Secure Identity system using JWT (Access Token & Refresh Token strategies).
 - **📝 Note Management**: Full CRUD operations for notes with Markdown support.
 - **☁️ Object Storage**: Efficient file handling using MinIO (S3 compatible) for attachments.
@@ -22,63 +25,74 @@ The goal is to simulate a real-world backend environment where high availability
 - **🔍 Observability**: Centralized logging and monitoring via **Serilog** and **Seq**.
 - **🐳 Containerization**: Full Docker support for "One-click" deployment.
 
+📱**Frontend (Flutter)**
+- **Cross-Platform**: Single codebase running on **Android, iOS, and Web.**
+- **State Management**: Predictable state management using **BLoC (Business Logic Component).**
+- **Networking**: Robust API handling with **Dio** and Interceptors.
+- **Responsive UI**: Adaptive design for both mobile screens and web dashboards.
+
 ## 🏗 System Architecture Diagram
 
-The system follows **Clean Architecture** to ensure separation of concerns and testability.
+The system operates on a client-server model within a containerized environment.
 
 ```mermaid
 graph TD
     %% Define Styles
-    classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef mobile fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef web fill:#e3f2fd,stroke:#0277bd,stroke-width:2px;
     classDef proxy fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
-    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef api fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef db fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
-    classDef cache fill:#ffe0b2,stroke:#e65100,stroke-width:2px;
 
-    %% Client Layer
-    User((User)) -->|"1. HTTPS Request"| NGINX["NGINX Reverse Proxy"]:::proxy
+    %% Clients
+    subgraph "Frontend Layer (Flutter)"
+        Mobile[Mobile App]:::mobile
+        Web[Web Admin]:::web
+    end
 
-    %% Backend Container
-    subgraph "Docker Network"
-        NGINX -->|"2. Forward Request"| API["API Layer (.NET 9)"]:::app
+    %% Backend
+    subgraph "Backend Infrastructure (Docker)"
+        Mobile & Web -->|"REST API (HTTPS)"| NGINX["NGINX Reverse Proxy"]:::proxy
+        NGINX -->|"Forward"| API["API Core (.NET 9)"]:::api
         
-        subgraph "MiniCloudNote Core Logic"
-            API -->|"3. Controllers -> Services"| Core["Core Layer (Business Logic)"]:::app
-            Core -->|"4. Interfaces"| Infra["Infrastructure Layer"]:::app
-        end
-
-        %% Data Layer
-        Infra -->|"5. EF Core"| PG[("PostgreSQL")]:::db
-        Infra -->|"6. MinIO SDK"| MinIO[("MinIO S3")]:::db
-        Infra -->|"7. Caching"| Redis[("Redis Cache")]:::cache
-        Infra -->|"8. Background Jobs"| Hangfire[("Hangfire Server")]:::app
+        API -->|"Persist"| PG[("PostgreSQL")]:::db
+        API -->|"Cache"| Redis[("Redis")]:::db
+        API -->|"Files"| MinIO[("MinIO S3")]:::db
+        API -->|"Logs"| Seq[("Seq Logging")]:::db
     end
 ```
 ## 🛠 Tech Stack
 
 This project utilizes a modern, industry-standard technology stack:
 
-- **Core Framework:** ASP.NET Core (.NET 9)
-- **Database:** PostgreSQL (Relational Data)
-- **ORM:** Entity Framework Core (Code-First Migration)
+- **Backend:** ASP.NET Core 9, Entity Framework Core, Hangfire
+- **Frontend:** Flutter (Dart), BLoC, Dio, Equatable
+- **Database:** PostgreSQL (Relational), Redis (Cache)
 - **Storage:** MinIO (S3 Compatible Object Storage)
-- **Caching:** Redis (Distributed Cache)
-- **Background Jobs:** Hangfire
-- **Logging:** Serilog + Seq
 - **DevOps:** Docker, Docker Compose, Jenkins, NGINX
-- **Testing:** xUnit (Planned), Postman/Swagger
+- **Tools:** Visual Studio 2022, VS Code, Postman, Android Studio
 
 ## 📂 Project Structure
 
 ```text
 MiniCloudNote/
-├── src/
-│   ├── MiniCloudNote.API/            # Entry Point, Controllers, DI Config
-│   ├── MiniCloudNote.Core/           # Domain Entities, Interfaces, DTOs (Pure C#)
-│   ├── MiniCloudNote.Infrastructure/ # DB Context, Repositories, External Services
-├── tests/                            # Unit and Integration Tests
-├── docker-compose.yml                # Orchestration for App + DB + Redis + MinIO + Seq
-└── nginx/                            # Reverse Proxy Configuration
+├── backend/                  # .NET Core API Solution
+│   ├── src/
+│   │   ├── MiniCloudNote.API/            # Entry Point
+│   │   ├── MiniCloudNote.Core/           # Domain & Logic
+│   │   └── MiniCloudNote.Infrastructure/ # DB & External Services
+│   ├── Dockerfile
+│   └── MiniCloudNote.sln
+│
+├── frontend/                 # Flutter Application
+│   ├── android/              # Android native code
+│   ├── ios/                  # iOS native code
+│   ├── lib/                  # Dart source code (Screens, BLoCs)
+│   └── pubspec.yaml
+│
+├── docker-compose.prod.yml   # Production Orchestration
+├── nginx/                    # Reverse Proxy Config
+└── .github/                  # CI/CD Workflows
 ```
 
 ## 🧹 Clean Architecture
@@ -98,41 +112,43 @@ Follow these steps to get **MiniCloudNote** running on your local machine.
 ### Prerequisites
 
 Ensure you have the following installed:
-- **[Docker Desktop](https://www.docker.com/products/docker-desktop)** (Essential for running the full stack).
-- **[.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)** (Optional, if you want to run/debug code locally without Docker).
-- **[Git](https://git-scm.com/)**.
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop)** (Required for Backend).
+- **[Flutter SDK](https://docs.flutter.dev/install)** (Required for Frontend).
 
-### Installation
-
-1. **Clone the repository**
+1. **Setup Backend (Docker)**
 
    ```bash
-   git clone https://github.com/PHThai254/MiniCloudNote.git
-   cd MiniCloudNote
+    # 1. Navigate to root
+    cd MiniCloudNote
+
+    # 2. Start Backend Infrastructure
+    docker-compose -f docker-compose.prod.yml up -d --build
     ```
+    Wait a few minutes for the containers to initialize.
 
-2. **Configure Environment:** 
-Since sensitive configuration files are not committed, you need to set up your `appsettings.json`.
-    * Create a file named `appsettings.json` in `src/MiniCloudNote.API/`
-    * (Optional) Update the connection strings if you are not using the default Docker setup.
-
-3. **Run with Docker Compose (Recommended):** 
-This command will spin up the API, PostgreSQL, Redis, MinIO, and Seq automatically.
+2. **Setup Frontend (Flutter)** 
+Open a new terminal to run the mobile/web app.
+    
     ```bash
-    docker-compose up -d --build
+    # 1. Navigate to frontend folder
+    cd frontend
+
+    # 2. Get Dependencies
+    flutter pub get
+
+    # 3. Run the App
+    flutter run
     ```
 
-4. **Verify Deployment:** Check if all containers are up and healthy:
-
-    ```bash
-    docker ps
-    ```
-
-5. **Access the Application:**
-    * **Swagger API Docs:** `http://localhost:5265/swagger`
+3. **Access the Application:**
+    * **API Swagger:** `http://localhost:5265/swagger`
     * **MinIO Console:** `http://localhost:9001`
     * **Seq Logs:** `http://localhost:5341`
     * **Hangfire Dashboard:** `http://localhost:5265/hangfire`
+
+    ---
+    **Author:** PHAM HONG THAI
+    ---
 
 
 
