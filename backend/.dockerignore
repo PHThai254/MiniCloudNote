@@ -1,6 +1,30 @@
+# --- Rác hệ thống & Git ---
 **/.dockerignore
 **/.git
+**/.gitattributes
+**/.gitignore
 **/.vs
+**/.vscode
+
+# --- Rác Build (Quan trọng để build nhanh) ---
 **/bin
 **/obj
 **/TestResults
+**/artifacts
+
+# --- IDE & User Specific ---
+**/*.user
+**/*.suo
+**/*.launchSettings.json
+
+# --- SECURITY (QUAN TRỌNG NHẤT) ---
+# Không copy Dockerfile vào trong container
+Dockerfile
+
+# Không copy file môi trường chứa mật khẩu (nếu lỡ tay để trong backend)
+.env
+.env.*
+
+# Không copy cấu hình Development vào Production
+**/appsettings.Development.json
+**/appsettings.local.json
