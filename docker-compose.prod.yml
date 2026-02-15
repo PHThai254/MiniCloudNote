@@ -26,8 +26,8 @@ services:
     image: thai254/minicloudnote-api:latest 
     container_name: minicloud-api-prod
     build:
-      context: .
-      dockerfile: Dockerfile # <--- Trỏ đúng file Dockerfile ở thư mục gốc
+      context: ./backend
+      dockerfile: Dockerfile # Nó sẽ tìm Dockerfile trong folder backend
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       # Kết nối DB dùng tên service "postgres"

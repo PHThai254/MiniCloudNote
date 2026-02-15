@@ -1,0 +1,368 @@
+{
+  "MiniCloudNote.Core.dll": {
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/TaxCalculator.cs": {
+      "MiniCloudNote.Core.TaxCalculator": {
+        "System.Decimal MiniCloudNote.Core.TaxCalculator::CalculateTax(System.Decimal)": {
+          "Lines": {
+            "7": 1,
+            "8": 1,
+            "9": 1,
+            "10": 1,
+            "13": 0,
+            "14": 1
+          },
+          "Branches": [
+            {
+              "Line": 8,
+              "Offset": 19,
+              "EndOffset": 21,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 1
+            },
+            {
+              "Line": 8,
+              "Offset": 19,
+              "EndOffset": 41,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/NoteService.cs": {
+      "MiniCloudNote.Core.Services.NoteService": {
+        "System.String MiniCloudNote.Core.Services.NoteService::FormatNoteContent(System.String,System.String)": {
+          "Lines": {
+            "107": 0,
+            "109": 0,
+            "111": 0,
+            "112": 0,
+            "114": 0,
+            "118": 0,
+            "120": 0
+          },
+          "Branches": [
+            {
+              "Line": 111,
+              "Offset": 44,
+              "EndOffset": 46,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 111,
+              "Offset": 44,
+              "EndOffset": 57,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.String MiniCloudNote.Core.Services.NoteService::GeneratePreview(MiniCloudNote.Core.Interfaces.IReadOnlyNote)": {
+          "Lines": {
+            "125": 0,
+            "128": 0,
+            "129": 0
+          },
+          "Branches": []
+        },
+        "System.Void MiniCloudNote.Core.Services.NoteService::.ctor(System.Collections.Generic.IEnumerable`1<MiniCloudNote.Core.Interfaces.IFormattingStrategy>,MiniCloudNote.Core.Interfaces.INoteRepository)": {
+          "Lines": {
+            "19": 0,
+            "20": 0,
+            "21": 0,
+            "22": 0,
+            "23": 0
+          },
+          "Branches": []
+        }
+      },
+      "MiniCloudNote.Core.Services.NoteService/<CreateNoteAsync>d__3": {
+        "System.Void MiniCloudNote.Core.Services.NoteService/<CreateNoteAsync>d__3::MoveNext()": {
+          "Lines": {
+            "27": 0,
+            "29": 0,
+            "30": 0,
+            "31": 0,
+            "33": 0,
+            "34": 0,
+            "35": 0,
+            "40": 0,
+            "41": 0,
+            "42": 0,
+            "43": 0,
+            "44": 0,
+            "45": 0,
+            "46": 0,
+            "47": 0,
+            "54": 0,
+            "60": 0,
+            "61": 0
+          },
+          "Branches": [
+            {
+              "Line": 29,
+              "Offset": 31,
+              "EndOffset": 33,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 29,
+              "Offset": 31,
+              "EndOffset": 45,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 52,
+              "EndOffset": 54,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 52,
+              "EndOffset": 58,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 72,
+              "EndOffset": 74,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 72,
+              "EndOffset": 86,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            }
+          ]
+        }
+      },
+      "MiniCloudNote.Core.Services.NoteService/<DeleteNoteAsync>d__7": {
+        "System.Void MiniCloudNote.Core.Services.NoteService/<DeleteNoteAsync>d__7::MoveNext()": {
+          "Lines": {
+            "95": 0,
+            "97": 0,
+            "98": 0,
+            "99": 0,
+            "100": 0,
+            "104": 0,
+            "105": 0
+          },
+          "Branches": [
+            {
+              "Line": 98,
+              "Offset": 173,
+              "EndOffset": 175,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 98,
+              "Offset": 173,
+              "EndOffset": 187,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        }
+      },
+      "MiniCloudNote.Core.Services.NoteService/<GetAllNotesAsync>d__4": {
+        "System.Void MiniCloudNote.Core.Services.NoteService/<GetAllNotesAsync>d__4::MoveNext()": {
+          "Lines": {
+            "65": 0,
+            "66": 0,
+            "67": 0
+          },
+          "Branches": []
+        }
+      },
+      "MiniCloudNote.Core.Services.NoteService/<GetNoteByIdAsync>d__5": {
+        "System.Void MiniCloudNote.Core.Services.NoteService/<GetNoteByIdAsync>d__5::MoveNext()": {
+          "Lines": {
+            "70": 0,
+            "71": 0,
+            "72": 0
+          },
+          "Branches": []
+        }
+      },
+      "MiniCloudNote.Core.Services.NoteService/<UpdateNoteAsync>d__6": {
+        "System.Void MiniCloudNote.Core.Services.NoteService/<UpdateNoteAsync>d__6::MoveNext()": {
+          "Lines": {
+            "76": 0,
+            "78": 0,
+            "79": 0,
+            "80": 0,
+            "81": 0,
+            "85": 0,
+            "86": 0,
+            "87": 0,
+            "90": 0,
+            "91": 0
+          },
+          "Branches": [
+            {
+              "Line": 79,
+              "Offset": 173,
+              "EndOffset": 175,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 79,
+              "Offset": 173,
+              "EndOffset": 187,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/HtmlFormattingStrategy.cs": {
+      "MiniCloudNote.Core.Services.FormattingStrategies.HtmlFormattingStrategy": {
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.HtmlFormattingStrategy::get_FormatType()": {
+          "Lines": {
+            "7": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.HtmlFormattingStrategy::Format(System.String)": {
+          "Lines": {
+            "10": 0,
+            "13": 0,
+            "14": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/MarkdownFormattingStrategy.cs": {
+      "MiniCloudNote.Core.Services.FormattingStrategies.MarkdownFormattingStrategy": {
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.MarkdownFormattingStrategy::get_FormatType()": {
+          "Lines": {
+            "7": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.MarkdownFormattingStrategy::Format(System.String)": {
+          "Lines": {
+            "10": 0,
+            "12": 0,
+            "13": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Services/FormattingStrategies/PlainTextFormattingStrategy.cs": {
+      "MiniCloudNote.Core.Services.FormattingStrategies.PlainTextFormattingStrategy": {
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.PlainTextFormattingStrategy::get_FormatType()": {
+          "Lines": {
+            "7": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Services.FormattingStrategies.PlainTextFormattingStrategy::Format(System.String)": {
+          "Lines": {
+            "10": 0,
+            "12": 0,
+            "13": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/Note.cs": {
+      "MiniCloudNote.Core.Entities.Note": {
+        "System.Guid MiniCloudNote.Core.Entities.Note::get_Id()": {
+          "Lines": {
+            "10": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.Note::get_Title()": {
+          "Lines": {
+            "14": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.Note::get_Content()": {
+          "Lines": {
+            "16": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime MiniCloudNote.Core.Entities.Note::get_CreatedAt()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> MiniCloudNote.Core.Entities.Note::get_UpdatedAt()": {
+          "Lines": {
+            "18": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/mnt/c/Personal Project/MiniCloudNote/src/MiniCloudNote.Core/Entities/User.cs": {
+      "MiniCloudNote.Core.Entities.User": {
+        "System.Guid MiniCloudNote.Core.Entities.User::get_Id()": {
+          "Lines": {
+            "8": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.User::get_Username()": {
+          "Lines": {
+            "12": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.User::get_PasswordHash()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.User::get_FullName()": {
+          "Lines": {
+            "19": 0
+          },
+          "Branches": []
+        },
+        "System.String MiniCloudNote.Core.Entities.User::get_Role()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        }
+      }
+    }
+  }
+}
