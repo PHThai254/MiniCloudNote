@@ -25,7 +25,7 @@ jobs:
     # BƯỚC 3: Chạy Test (Quan trọng! Test lỗi là dừng ngay)
     # Chúng ta dùng file .sln để nó tự tìm project test
     - name: Test with dotnet
-      run: dotnet test MiniCloudNote.sln
+      run: dotnet test backend/MiniCloudNote.sln
 
     # BƯỚC 4: Đăng nhập vào Docker Hub (Dùng bí mật đã lưu)
     - name: Login to Docker Hub
