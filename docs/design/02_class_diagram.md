@@ -6,7 +6,7 @@ Tài liệu này mô tả Sơ đồ lớp (Class Diagram) cho tầng **Core (Dom
 ## 2. Sơ đồ Minh họa
 *(Bấm vào ảnh để xem kích thước đầy đủ)*
 
-![Sơ đồ lớp (Class Diagram)](assets/class_diagram.png)
+![Sơ đồ lớp (Class Diagram)](assets/class_diagram.jpg)
 
 ## 3. Phân tích Các Thực thể (Entities)
 
