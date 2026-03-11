@@ -1,0 +1,57 @@
+@startuml sequence_login
+' Cấu hình giao diện cho gọn gàng và hiện đại
+skinparam maxMessageSize 100
+skinparam responseMessageBelowArrow true
+
+' 1. Khai báo các đối tượng tham gia (Lifelines)
+actor "Client (Flutter/Web)" as Client
+participant "AuthController" as Controller
+participant "AuthService" as Service
+participant "UserRepository" as Repo
+database "PostgreSQL" as DB
+
+' 2. Bắt đầu luồng gọi
+Client -> Controller: POST /api/auth/login\n(email, password)
+activate Controller
+
+Controller -> Service: LoginAsync(email, password)
+activate Service
+
+Service -> Repo: GetUserByEmailAsync(email)
+activate Repo
+
+Repo -> DB: SELECT * FROM users WHERE email = ...
+activate DB
+DB --> Repo: Return UserData / null
+deactivate DB
+
+Repo --> Service: Return ApplicationUser
+deactivate Repo
+
+' 3. Khối điều kiện Rẽ nhánh (If/Else)
+alt User is Null OR Password Invalid
+    Service --> Controller: Throw UnauthorizedException
+    Controller --> Client: 401 Unauthorized (Error Message)
+else Valid Credentials (Đăng nhập thành công)
+    ' Self-message (Hàm nội bộ)
+    Service -> Service: GenerateJwtToken()
+    Service -> Service: GenerateRefreshToken()
+    
+    ' Lưu Refresh Token mới xuống DB
+    Service -> Repo: UpdateRefreshTokenAsync(...)
+    activate Repo
+    Repo -> DB: UPDATE users SET refresh_token = ...
+    activate DB
+    DB --> Repo: Success
+    deactivate DB
+    Repo --> Service: Success
+    deactivate Repo
+
+    Service --> Controller: Return TokenPair (Access, Refresh)
+end
+deactivate Service
+
+Controller --> Client: 200 OK (JSON TokenPair)
+deactivate Controller
+
+@enduml
