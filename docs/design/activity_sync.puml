@@ -1,0 +1,55 @@
+@startuml activity_sync
+' Cấu hình màu sắc và giao diện
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  ArrowColor #1565C0
+}
+
+|Flutter App (Client)|
+start
+:Lắng nghe trạng thái mạng (Connectivity);
+
+if (Thiết bị có kết nối Internet?) then (Có mạng)
+  :Truy vấn Local DB (SQLite/Hive/Isar)\ntìm các Ghi chú có cờ "is_synced = false";
+  
+  if (Có dữ liệu cần đồng bộ?) then (Có)
+    
+    while (Duyệt từng Ghi chú chưa đồng bộ) is (Còn Ghi chú)
+      :Đóng gói dữ liệu thành JSON;
+      :Gọi API POST/PUT lên Endpoint;
+      
+      |C# .NET Core (Server)|
+      :Xác thực Token & Xử lý Request;
+      :Lưu/Cập nhật dữ liệu vào PostgreSQL;
+      
+      if (Lưu thành công?) then (Yes)
+        :Trả về HTTP 200/201 OK;
+        
+        |Flutter App (Client)|
+        :Cập nhật cờ "is_synced = true"\ncho Ghi chú trong Local DB;
+      else (No, Lỗi Server hoặc Xung đột)
+        |C# .NET Core (Server)|
+        :Trả về lỗi 4xx/5xx;
+        
+        |Flutter underlying (Client)|
+        :Giữ nguyên trạng thái "is_synced = false"\n(Sẽ thử lại ở lần đồng bộ sau);
+      endif
+      
+    endwhile (Hết danh sách)
+    
+    |Flutter App (Client)|
+    :Hiển thị Toast/Snackbar:\n"Đồng bộ dữ liệu thành công";
+    
+  else (Không có)
+    :Không làm gì cả;
+  endif
+  
+else (Không có mạng)
+  :Lưu Ghi chú mới/chỉnh sửa vào Local DB;
+  :Gắn cờ "is_synced = false";
+endif
+
+stop
+@enduml
