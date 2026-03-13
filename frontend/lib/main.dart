@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// Import file login_screen.dart mà bạn vừa tạo
+import 'package:frontend/features/auth/screens/login_screen.dart';
 
 void main() {
   runApp(const MiniCloudNoteApp());
@@ -13,19 +15,11 @@ class MiniCloudNoteApp extends StatelessWidget {
       title: 'MiniCloudNote',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-        ), // Màu chủ đạo từ Figma
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'MiniCloudNote - Ngày 60 Sẵn Sàng!',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+      // Đổi trang chủ thành LoginScreen()
+      home: const LoginScreen(),
     );
   }
 }

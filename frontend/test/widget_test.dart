@@ -8,6 +8,6 @@ void main() {
     await tester.pumpWidget(const MiniCloudNoteApp());
 
     // Kiểm tra xem dòng chữ khởi động có xuất hiện trên màn hình không
-    expect(find.text('MiniCloudNote - Sẵn Sàng!'), findsOneWidget);
+    expect(find.text('MiniCloudNote - Sẵn sàng!'), findsOneWidget);
   });
 }
