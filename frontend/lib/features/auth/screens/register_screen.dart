@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +75,7 @@ class RegisterScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _nameController,
                 decoration: InputDecoration(
                   hintText: 'Example: John Doe',
                   hintStyle: const TextStyle(color: Colors.black38),
@@ -93,6 +111,7 @@ class RegisterScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Example: johndoe@gmail.com',
@@ -129,6 +148,7 @@ class RegisterScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: '********',
@@ -161,7 +181,38 @@ class RegisterScreen extends StatelessWidget {
               // --- Register Button ---
               ElevatedButton(
                 onPressed: () {
-                  // TODO: Gọi API Đăng ký
+                  final name = _nameController.text;
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
+
+                  // KIỂM TRA RỖNG: Nếu 1 trong 3 ô bị bỏ trống
+                  if (name.isEmpty || email.isEmpty || password.isEmpty) {
+                    // Hiện thông báo lỗi màu đỏ
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vui lòng điền đầy đủ thông tin!'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior
+                            .floating, // Làm thông báo nổi lên cho đẹp
+                      ),
+                    );
+                    return; // Dừng hàm lại ngay tại đây, KHÔNG chạy tiếp đoạn code bên dưới
+                  }
+
+                  // NẾU DỮ LIỆU HỢP LỆ (Không bị rỗng)
+                  debugPrint('=== DỮ LIỆU HỢP LỆ ===');
+                  debugPrint('Tên: $name');
+                  debugPrint('Email: $email');
+                  debugPrint('Mật khẩu: $password');
+
+                  // Hiện thông báo thành công màu xanh
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Dữ liệu hợp lệ! Chuẩn bị gọi API...'),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,

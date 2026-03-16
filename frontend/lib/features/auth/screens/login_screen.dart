@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
+import 'package:frontend/features/auth/services/auth_service.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +56,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Example: johndoe@gmail.com',
@@ -76,6 +93,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 obscureText: true, // Biến chữ thành dấu chấm tròn
                 decoration: InputDecoration(
                   hintText: '********',
@@ -131,8 +149,35 @@ class LoginScreen extends StatelessWidget {
 
               // --- Login Button ---
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Gọi API Đăng nhập
+                onPressed: () async {
+                  // Lấy dữ liệu dạng chuỗi (text) từ controller
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
+
+                  // KIỂM TRA RỖNG: Nếu 1 trong 2 ô bị bỏ trống
+                  if (email.isEmpty || password.isEmpty) {
+                    // Hiện thông báo lỗi màu đỏ
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vui lòng điền đầy đủ thông tin!'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior
+                            .floating, // Làm thông báo nổi lên cho đẹp
+                      ),
+                    );
+                    return; // Dừng hàm lại ngay tại đây, KHÔNG chạy tiếp đoạn code bên dưới
+                  }
+
+                  // In ra tab DEBUG CONSOLE của VS Code
+                  debugPrint('=== THỬ NGHIỆM ĐĂNG NHẬP ===');
+                  debugPrint('Email người dùng nhập: $email');
+                  debugPrint('Mật khẩu người dùng nhập: $password');
+
+                  await AuthService().loginUser(
+                    context,
+                    _emailController.text,
+                    _passwordController.text,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
@@ -159,7 +204,7 @@ class LoginScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.grey),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
