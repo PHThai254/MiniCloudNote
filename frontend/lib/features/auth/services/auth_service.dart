@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/screens/login_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // THÊM THƯ VIỆN KÉT SẮT
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Thư viện để lưu trữ an toàn (Token)
 
 class AuthService {
   static const String baseUrl = 'http://127.0.0.1:5265/api/auth';
@@ -145,6 +146,38 @@ class AuthService {
         ),
       );
       return false;
+    }
+  }
+
+  // --- Hàm Đăng xuất ---
+  Future<void> logoutUser(BuildContext context) async {
+    try {
+      debugPrint('Đang thực hiện Đăng xuất...');
+
+      // 1. Mở két sắt và xóa Token
+      await _storage.delete(key: 'jwt_token');
+      debugPrint('Đã xóa Token khỏi két sắt!');
+
+      // Tam khiên bảo vệ context
+      if (!context.mounted) return;
+
+      // 2.Chuyển hướng về LoginScreen và XÓA SẠCH lịch sử trang
+      // pushAndRemoveUntil giúp hủy toàn bộ các màn hình trước đó
+      // Tránh việc người dùng bấm phím Back (trở về) trên điện thoại và lọt lại vào HomeScreen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false, // false nghĩa là xóa hết mọi route cũ
+      );
+    } catch (e) {
+      debugPrint('Lỗi khi Đăng xuất: $e');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại!'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }
