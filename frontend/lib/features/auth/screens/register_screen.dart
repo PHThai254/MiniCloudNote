@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/services/auth_service.dart'; // THÊM DÒNG NÀY ĐỂ KẾT NỐI API
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,19 +36,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pop(context); // Lệnh đóng màn hình hiện tại
+                    Navigator.pop(context);
                   },
                   child: Container(
-                    // Chìa khóa căn lề: padding left = 0 để sát mép bằng chữ R.
-                    // Đồng thời mở rộng vùng bấm (tap area) sang phải và xuống dưới cho dễ chạm.
                     padding: const EdgeInsets.only(bottom: 16, right: 30),
-                    color: Colors
-                        .transparent, // Cần có màu trong suốt để toàn bộ Container có thể bấm được
+                    color: Colors.transparent,
                     child: const Icon(
-                      Icons
-                          .arrow_back_ios_new, // Đổi sang mũi tên kiểu iOS nhìn sẽ thanh thoát và hiện đại hơn
+                      Icons.arrow_back_ios_new,
                       color: Colors.black87,
-                      size: 28, // Tăng kích thước icon lên (Mặc định chỉ là 24)
+                      size: 28,
                     ),
                   ),
                 ),
@@ -180,39 +177,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               // --- Register Button ---
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   final name = _nameController.text;
                   final email = _emailController.text;
+                  final generatedUsername = email.split('@')[0];
                   final password = _passwordController.text;
 
-                  // KIỂM TRA RỖNG: Nếu 1 trong 3 ô bị bỏ trống
+                  // KIỂM TRA RỖNG
                   if (name.isEmpty || email.isEmpty || password.isEmpty) {
-                    // Hiện thông báo lỗi màu đỏ
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Vui lòng điền đầy đủ thông tin!'),
                         backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior
-                            .floating, // Làm thông báo nổi lên cho đẹp
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
-                    return; // Dừng hàm lại ngay tại đây, KHÔNG chạy tiếp đoạn code bên dưới
+                    return;
                   }
 
-                  // NẾU DỮ LIỆU HỢP LỆ (Không bị rỗng)
-                  debugPrint('=== DỮ LIỆU HỢP LỆ ===');
-                  debugPrint('Tên: $name');
-                  debugPrint('Email: $email');
-                  debugPrint('Mật khẩu: $password');
-
-                  // Hiện thông báo thành công màu xanh
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Dữ liệu hợp lệ! Chuẩn bị gọi API...'),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                    ),
+                  // GỌI API ĐĂNG KÝ THẬT SỰ
+                  // 1. Gửi dữ liệu qua AuthService
+                  bool isSuccess = await AuthService().registerUser(
+                    context,
+                    generatedUsername,
+                    name,
+                    email,
+                    password,
                   );
+
+                  // 2. Nếu đăng ký thành công trên Server, đá người dùng về trang Login
+                  if (isSuccess) {
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,

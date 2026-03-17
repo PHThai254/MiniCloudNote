@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
 import 'package:frontend/features/auth/services/auth_service.dart';
+import 'package:frontend/features/notes/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +14,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -24,9 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // SafeArea giúp nội dung không bị lẹm vào phần tai thỏ hoặc thanh điều hướng
       body: SafeArea(
-        // SingleChildScrollView cực kỳ quan trọng: Giúp cuộn màn hình khi bàn phím hiện lên, tránh lỗi vạch vàng đen (Overflow)
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
           child: Column(
@@ -94,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
-                obscureText: true, // Biến chữ thành dấu chấm tròn
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: '********',
                   hintStyle: const TextStyle(color: Colors.black38),
@@ -103,6 +105,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -127,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
-                  onPressed: () {
-                    // TODO: Chức năng quên mật khẩu
-                  },
+                  onPressed: () {},
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: const Size(50, 30),
@@ -149,38 +162,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // --- Login Button ---
               ElevatedButton(
-                onPressed: () async {
-                  // Lấy dữ liệu dạng chuỗi (text) từ controller
-                  final email = _emailController.text;
-                  final password = _passwordController.text;
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        final email = _emailController.text;
+                        final password = _passwordController.text;
 
-                  // KIỂM TRA RỖNG: Nếu 1 trong 2 ô bị bỏ trống
-                  if (email.isEmpty || password.isEmpty) {
-                    // Hiện thông báo lỗi màu đỏ
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vui lòng điền đầy đủ thông tin!'),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior
-                            .floating, // Làm thông báo nổi lên cho đẹp
-                      ),
-                    );
-                    return; // Dừng hàm lại ngay tại đây, KHÔNG chạy tiếp đoạn code bên dưới
-                  }
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Vui lòng điền đầy đủ thông tin!'),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
 
-                  // In ra tab DEBUG CONSOLE của VS Code
-                  debugPrint('=== THỬ NGHIỆM ĐĂNG NHẬP ===');
-                  debugPrint('Email người dùng nhập: $email');
-                  debugPrint('Mật khẩu người dùng nhập: $password');
+                        setState(() {
+                          _isLoading = true;
+                        });
 
-                  await AuthService().loginUser(
-                    context,
-                    _emailController.text,
-                    _passwordController.text,
-                  );
-                },
+                        try {
+                          // CẬP NHẬT: Đợi Service trả về kết quả đăng nhập (true/false)
+                          final isSuccess = await AuthService().loginUser(
+                            context,
+                            email,
+                            password,
+                          );
+                          // Thêm tấm khiên bảo vệ context ở đây
+                          if (!context.mounted) return;
+
+                          // Nếu thành công và màn hình vẫn tồn tại -> Chuyển bánh!
+                          if (isSuccess) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (context.mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
+                  disabledBackgroundColor: Colors.deepPurple.withValues(
+                    alpha: 0.7,
+                  ),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
@@ -188,10 +222,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               const SizedBox(height: 24),
 
@@ -204,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.grey),
                   ),
                   TextButton(
-                    onPressed: () async {
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
