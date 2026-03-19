@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/core/api_config.dart';
 
 // Import "Bản thiết kế" Note mà chúng ta vừa làm
 import 'package:frontend/features/notes/models/note_model.dart';
 
 class NoteService {
   // Đường dẫn API lấy danh sách ghi chú (Vẫn dùng 127.0.0.1 và cổng 5265 qua cáp USB)
-  static const String baseUrl = 'http://127.0.0.1:5265/api/notes';
+  static String get baseUrl => '${ApiConfig.baseUrl}/notes';
 
   final _storage = const FlutterSecureStorage();
 
@@ -62,6 +63,42 @@ class NoteService {
     } catch (e) {
       debugPrint('Lỗi NoteService (Lấy danh sách): $e');
       throw Exception('Không thể tải dữ liệu: $e');
+    }
+  }
+
+  // --- Hàm tạo mới một Ghi chú ---
+  Future<bool> createNote(String title, String content) async {
+    try {
+      debugPrint('Đang gửi Ghi chú mới lên Server...');
+
+      // 1. Mở két sắt lấy Thẻ căn cước (Token)
+      String? token = await _storage.read(key: 'jwt_token');
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Chưa đăng nhập!');
+      }
+
+      // 2. Đóng gói dữ liệu thành JSON và gọi API (POST)
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Vẫn phải giơ thẻ Bearer ra nhé
+        },
+        body: jsonEncode({'title': title, 'content': content}),
+      );
+
+      // 3. Kiểm tra kết quả (Backend thường trả về 201 Created hoặc 200 OK)
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('Ghi chú đã được tạo thành công!');
+        return true;
+      } else {
+        debugPrint('Lỗi Server: ${response.statusCode} - ${response.body}');
+        throw Exception('Lỗi khi lưu Ghi chú: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (Tạo mới): $e');
+      throw Exception('Không thể tạo ghi chú: $e');
     }
   }
 }

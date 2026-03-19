@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/login_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Thư viện để lưu trữ an toàn (Token)
+import 'package:frontend/core/api_config.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://127.0.0.1:5265/api/auth';
+  static String get baseUrl => '${ApiConfig.baseUrl}/auth';
 
-  // TẠO KÉT SẮT BẢO MẬT: Sẽ dùng để lưu Token
+  // TẠO KÉT SẮT BẢO MẬT: Sẽ dù ng để lưu Token
   final _storage = const FlutterSecureStorage();
 
   // --- Hàm Đăng nhập ---

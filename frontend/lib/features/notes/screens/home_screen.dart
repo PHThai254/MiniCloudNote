@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/services/auth_service.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
 import 'package:frontend/features/notes/services/note_service.dart';
+import 'package:frontend/features/notes/screens/add_note_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -148,13 +149,17 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       // Thêm nút Dấu CỘNG (+) to đùng ở góc dưới để mồi cho tính năng Thêm Ghi Chú
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Tương lai: Mở màn hình thêm ghi chú mới
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tính năng Thêm ghi chú sẽ làm ở Ngày 64!'),
-            ),
+        onPressed: () async {
+          // 1. Chuyển sang màn hình Thêm Ghi chú và ĐỢI kết quả trả về
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddNoteScreen()),
           );
+
+          // 2. Nếu AddNoteScreen báo "true" (Đã lưu thành công), thì load lại danh sách!
+          if (result == true) {
+            _loadNotes();
+          }
         },
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
