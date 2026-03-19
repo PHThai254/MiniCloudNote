@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/api_config.dart';
-
-// Import "Bản thiết kế" Note mà chúng ta vừa làm
 import 'package:frontend/features/notes/models/note_model.dart';
 
 class NoteService {
@@ -99,6 +97,74 @@ class NoteService {
     } catch (e) {
       debugPrint('Lỗi NoteService (Tạo mới): $e');
       throw Exception('Không thể tạo ghi chú: $e');
+    }
+  }
+
+  // --- Hàm Cập nhật Ghi chú (Edit) ---
+  Future<bool> updateNote(String id, String title, String content) async {
+    try {
+      debugPrint('Đang gửi bản cập nhật Ghi chú lên Server (ID: $id)...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      // Gọi API PUT với đường dẫn có chứa ID ở cuối (VD: /api/notes/a5f23e...)
+      final response = await http.put(
+        Uri.parse('$baseUrl/$id'), // 1. Đưa Guid lên URL
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'id': id, // 2. Đưa Guid vào Body (Để khớp với DTO của C#)
+          'title': title,
+          'content': content,
+        }),
+      );
+
+      // Backend thường trả về 200 OK hoặc 204 No Content khi update thành công
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        debugPrint('Cập nhật thành công!');
+        return true;
+      } else {
+        throw Exception(
+          'Lỗi Server: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (Cập nhật): $e');
+      throw Exception('Không thể cập nhật ghi chú: $e');
+    }
+  }
+
+  // --- Hàm Xóa Ghi chú (Delete) ---
+  Future<bool> deleteNote(String id) async {
+    try {
+      debugPrint('Đang yêu cầu xóa Ghi chú ID: $id...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      // Gọi API DELETE
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      // Backend thường trả về 200 OK hoặc 204 No Content
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        debugPrint('Đã xóa thành công!');
+        return true;
+      } else {
+        throw Exception('Lỗi Server: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (Xóa): $e');
+      throw Exception('Không thể xóa: $e');
     }
   }
 }

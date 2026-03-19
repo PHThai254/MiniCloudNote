@@ -1,6 +1,5 @@
 class Note {
-  final int?
-  id; // Dấu ? vì khi tạo Note mới trên app, nó chưa có ID (C# sẽ tự cấp)
+  final String? id; // Chắc chắn đây là String? vì C# dùng Guid
   final String title;
   final String content;
   final DateTime? createdAt;
@@ -10,18 +9,9 @@ class Note {
   // --- HÀM 1: Nhận hàng từ C# (Từ JSON -> Dart Object) ---
   // ASP.NET Core mặc định trả về JSON dạng camelCase (chữ cái đầu viết thường)
   factory Note.fromJson(Map<String, dynamic> json) {
-    // Xử lý an toàn cho ID: Cho dù Backend trả về số (1) hay chuỗi ("1") thì cũng ép về int được
-    int? parsedId;
-    if (json['id'] != null) {
-      if (json['id'] is int) {
-        parsedId = json['id'];
-      } else if (json['id'] is String) {
-        parsedId = int.tryParse(json['id']);
-      }
-    }
-
     return Note(
-      id: parsedId,
+      // Ép thẳng sang chuỗi (String) vì Backend dùng Guid
+      id: json['id']?.toString(),
       title:
           json['title'] ??
           'Không có tiêu đề', // Nếu null thì gán giá trị mặc định

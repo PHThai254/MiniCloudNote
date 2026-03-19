@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/notes/services/note_service.dart';
+import 'package:frontend/features/notes/models/note_model.dart';
 
 class AddNoteScreen extends StatefulWidget {
-  const AddNoteScreen({super.key});
+  final Note? note; // Nếu note == null là Tạo mới, nếu có dữ liệu là Chỉnh sửa
+
+  // Thêm this.note vào constructor
+  const AddNoteScreen({super.key, this.note});
 
   @override
   State<AddNoteScreen> createState() => _AddNoteScreenState();
@@ -13,6 +17,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   final TextEditingController _contentController = TextEditingController();
   final NoteService _noteService = NoteService();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Nếu màn hình nhận được một Note cũ, hãy nhét tiêu đề và nội dung vào ô gõ chữ
+    if (widget.note != null) {
+      _titleController.text = widget.note!.title;
+      _contentController.text = widget.note!.content;
+    }
+  }
 
   Future<void> _saveNote() async {
     // Chặn người dùng lưu ghi chú trống
@@ -28,10 +42,21 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
     try {
       // Gọi đội vận chuyển NoteService
-      bool success = await _noteService.createNote(
-        _titleController.text.trim(),
-        _contentController.text.trim(),
-      );
+      bool success = false;
+
+      if (widget.note != null) {
+        success = await _noteService.updateNote(
+          widget.note!.id!, // ID chắc chắn không null vì đây là chế độ Edit
+          _titleController.text.trim(),
+          _contentController.text.trim(),
+        );
+      } else {
+        // CHẾ ĐỘ TẠO MỚI (Như cũ)
+        success = await _noteService.createNote(
+          _titleController.text.trim(),
+          _contentController.text.trim(),
+        );
+      }
 
       if (success && mounted) {
         // Lưu thành công! Trở về màn hình trước và gửi kèm tín hiệu "true" (Báo là đã có thay đổi)
@@ -108,16 +133,26 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             ),
             // Ô nhập Nội dung
             Expanded(
-              child: TextField(
-                controller: _contentController,
-                textCapitalization: TextCapitalization.sentences,
-                style: const TextStyle(fontSize: 18, height: 1.5),
-                decoration: const InputDecoration(
-                  hintText: 'Bắt đầu gõ nội dung ở đây...',
-                  border: InputBorder.none,
+              child: GestureDetector(
+                // Khi người dùng chạm vào vùng trống (không phải chữ), hãy nhả focus ra
+                onTap: () {
+                  FocusScope.of(context).unfocus();
+                },
+                child: TextField(
+                  controller: _contentController,
+                  textCapitalization: TextCapitalization.sentences,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  style: const TextStyle(fontSize: 18, height: 1.5),
+                  decoration: const InputDecoration(
+                    hintText: 'Bắt đầu gõ nội dung ở đây...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(bottom: 100),
+                  ),
                 ),
-                maxLines: null, // Quan trọng: Cho phép gõ văn bản vô hạn dòng
-                keyboardType: TextInputType.multiline,
               ),
             ),
           ],

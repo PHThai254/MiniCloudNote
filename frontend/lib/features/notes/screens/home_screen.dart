@@ -118,29 +118,131 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: notes.length,
             itemBuilder: (context, index) {
               final note = notes[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+
+              // BỌC THẺ CARD BẰNG DISMISSIBLE
+              return Dismissible(
+                // Mỗi Dismissible bắt buộc phải có một Key duy nhất (Dùng ID của ghi chú)
+                key: Key(note.id ?? index.toString()),
+                direction: DismissDirection
+                    .endToStart, // Chỉ cho phép vuốt từ phải sang trái
+                // 1. Giao diện nền màu đỏ lộ ra khi đang vuốt
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
-                child: ListTile(
-                  title: Text(
-                    note.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+
+                // 2. Hiện hộp thoại hỏi "Bạn có chắc chắn?" trước khi vuốt bay mất
+                confirmDismiss: (direction) async {
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Xác nhận xóa"),
+                        content: const Text(
+                          "Bạn có chắc chắn muốn xóa ghi chú này không?",
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(false), // Nhấn Hủy
+                            child: const Text(
+                              "Hủy",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(true), // Nhấn Xóa
+                            child: const Text(
+                              "Xóa",
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+
+                // 3. Sự kiện xảy ra SAU KHI người dùng bấm chữ "Xóa" trên hộp thoại
+                onDismissed: (direction) async {
+                  if (note.id != null) {
+                    try {
+                      // Gọi API xóa trên Server
+                      await NoteService().deleteNote(note.id!);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã xóa ghi chú thành công!'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      // Nếu lỗi mạng, tải lại danh sách để "phục hồi" cái thẻ vừa bị vuốt mất
+                      _loadNotes();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Xóa thất bại: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
+
+                // 4. ĐÂY CHÍNH LÀ CÁI THẺ CARD GIAO DIỆN CŨ CỦA BẠN
+                child: Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      note.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
+                    subtitle: Text(
+                      note.content,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
+                    onTap: () async {
+                      // Logic mở màn hình Edit
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddNoteScreen(note: note),
+                        ),
+                      );
+                      if (result == true) _loadNotes();
+                    },
                   ),
-                  subtitle: Text(
-                    note.content,
-                    maxLines: 2, // Chỉ hiện tối đa 2 dòng nội dung
-                    overflow: TextOverflow.ellipsis, // Thêm dấu ... nếu dài quá
-                  ),
-                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                  onTap: () {
-                    // Tương lai: Bấm vào đây để xem chi tiết ghi chú
-                  },
                 ),
               );
             },
