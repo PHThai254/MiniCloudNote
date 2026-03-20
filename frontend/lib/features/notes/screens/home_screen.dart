@@ -64,6 +64,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Trạng thái 2: Lỗi mạng hoặc Token hết hạn (Hiển thị thông báo đỏ)
           if (snapshot.hasError) {
+            final errorMsg = snapshot.error.toString();
+
+            // --- RADAR KÍCH HOẠT TẠI ĐÂY ---
+            if (errorMsg.contains('Phiên đăng nhập hết hạn')) {
+              // Lưu ý: Không thể chuyển trang ngay lúc Flutter đang vẽ giao diện (build).
+              // Phải dùng addPostFrameCallback để hẹn "Vẽ xong màn hình này thì đá người dùng ra ngay!"
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!',
+                    ),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                // Gọi hàm của bạn để dọn két sắt và đá văng ra ngoài
+                AuthService().logoutUser(context);
+              });
+
+              // Trong 1 tíc tắc chờ bị đá ra ngoài, hiển thị tạm vòng xoay
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.orange),
+              );
+            }
+
+            // NẾU KHÔNG PHẢI LỖI TOKEN (Ví dụ: Mất mạng), THÌ HIỆN UI LỖI NHƯ BÌNH THƯỜNG
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.error_outline, color: Colors.red, size: 60),
                   const SizedBox(height: 16),
                   Text(
-                    'Lỗi: ${snapshot.error}',
+                    'Lỗi: $errorMsg',
                     style: const TextStyle(color: Colors.red),
                     textAlign: TextAlign.center,
                   ),

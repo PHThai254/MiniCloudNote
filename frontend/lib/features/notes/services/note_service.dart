@@ -21,7 +21,7 @@ class NoteService {
 
       // Nếu không có token, báo lỗi ngay lập tức
       if (token == null || token.isEmpty) {
-        throw Exception('Chưa đăng nhập hoặc Token đã hết hạn');
+        throw Exception('Chưa đăng nhập!');
       }
 
       // 2. GỌI API VÀ XUẤT TRÌNH THẺ CĂN CƯỚC (HEADER AUTHORIZATION)
@@ -33,10 +33,8 @@ class NoteService {
           'Authorization': 'Bearer $token',
         },
       );
-
       // 3. XỬ LÝ KẾT QUẢ TRẢ VỀ
       if (response.statusCode == 200) {
-        // Xóa dòng jsonDecode cũ đi và thay bằng đoạn này:
         final dynamic decodedResponse = jsonDecode(response.body);
         List<dynamic> jsonList = [];
 
@@ -59,8 +57,8 @@ class NoteService {
         throw Exception('Lỗi Server: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('Lỗi NoteService (Lấy danh sách): $e');
-      throw Exception('Không thể tải dữ liệu: $e');
+      debugPrint('Lỗi NoteService (getAllNotes): $e');
+      rethrow; // Đẩy lỗi lên cho UI xử lý (VD: Hiển thị SnackBar)
     }
   }
 

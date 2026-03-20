@@ -1,7 +1,7 @@
 class ApiConfig {
   // Công tắc đổi thành true nếu chạy Máy ảo (Emulator)
   // Công tắc đổi thành false nếu cắm cáp Máy thật (Redmi)
-  static const bool isEmulator = false;
+  static const bool isEmulator = true;
 
   // Tự động phân luồng địa chỉ IP dựa vào công tắc trên
   static String get baseUrl {
