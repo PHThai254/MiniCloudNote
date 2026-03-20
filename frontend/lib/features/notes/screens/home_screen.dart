@@ -15,6 +15,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // Khai báo một biến Future để chứa danh sách ghi chú sắp được tải về
   late Future<List<Note>> _notesFuture;
   final NoteService _noteService = NoteService();
+  // 2 biến này để điều khiển tìm kiếm ---
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -24,9 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Hàm mồi để gọi NoteService
-  void _loadNotes() {
+  void _loadNotes([String? query]) {
     setState(() {
-      _notesFuture = _noteService.getAllNotes();
+      // Truyền từ khóa xuống Service
+      _notesFuture = _noteService.getAllNotes(searchQuery: query);
     });
   }
 
@@ -34,21 +38,56 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'MiniCloudNote',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        // CÚ PHÁP BIẾN HÌNH: Nếu đang tìm kiếm thì vẽ ô nhập chữ, nếu không thì hiện Tên App
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true, // Tự động bật bàn phím lên luôn
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm ghi chú...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+                // GÕ CHỮ ĐẾN ĐÂU, GỌI API TÌM KIẾM ĐẾN ĐÓ
+                onChanged: (value) {
+                  _loadNotes(value);
+                },
+              )
+            : const Text(
+                'MiniCloudNote',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Nút Kính lúp / Nút X
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Đăng xuất',
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
-              AuthService().logoutUser(context);
+              setState(() {
+                if (_isSearching) {
+                  // Nếu đang tìm kiếm mà bấm X -> Tắt tìm kiếm, xóa chữ, tải lại danh sách gốc
+                  _isSearching = false;
+                  _searchController.clear();
+                  _loadNotes();
+                } else {
+                  // Nếu đang bình thường mà bấm kính lúp -> Mở thanh tìm kiếm
+                  _isSearching = true;
+                }
+              });
             },
           ),
+          // Chỉ hiện nút Đăng xuất khi KHÔNG tìm kiếm (cho đỡ chật chỗ)
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Đăng xuất',
+              onPressed: () {
+                AuthService().logoutUser(context);
+              },
+            ),
         ],
       ),
       // --- SỨC MẠNH CỦA FUTUREBUILDER NẰM Ở ĐÂY ---

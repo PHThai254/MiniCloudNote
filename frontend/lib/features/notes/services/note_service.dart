@@ -12,7 +12,8 @@ class NoteService {
   final _storage = const FlutterSecureStorage();
 
   // --- Hàm lấy toàn bộ danh sách Ghi chú ---
-  Future<List<Note>> getAllNotes() async {
+  // THÊM: Tham số searchQuery trong ngoặc nhọn (có thể null)
+  Future<List<Note>> getAllNotes({String? searchQuery}) async {
     try {
       debugPrint('Đang yêu cầu lấy danh sách Ghi chú từ Server...');
 
@@ -24,12 +25,19 @@ class NoteService {
         throw Exception('Chưa đăng nhập!');
       }
 
+      // TẠO URL THÔNG MINH: Nếu có từ khóa thì gắn thêm ?SearchTerm=...
+      String requestUrl = baseUrl;
+      if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+        // Uri.encodeComponent giúp mã hóa các dấu cách, ký tự đặc biệt tiếng Việt an toàn
+        requestUrl =
+            '$baseUrl?SearchTerm=${Uri.encodeComponent(searchQuery.trim())}';
+      }
+
       // 2. GỌI API VÀ XUẤT TRÌNH THẺ CĂN CƯỚC (HEADER AUTHORIZATION)
       final response = await http.get(
-        Uri.parse(baseUrl),
+        Uri.parse(requestUrl),
         headers: {
           'Content-Type': 'application/json',
-          // Đây là chiếc vé thông hành! Gắn chữ 'Bearer ' phía trước token
           'Authorization': 'Bearer $token',
         },
       );
