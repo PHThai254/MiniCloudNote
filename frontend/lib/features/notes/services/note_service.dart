@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/api_config.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
+import 'package:frontend/features/notes/services/database_helper.dart';
 
 class NoteService {
   // Đường dẫn API lấy danh sách ghi chú (Vẫn dùng 127.0.0.1 và cổng 5265 qua cáp USB)
@@ -11,62 +12,92 @@ class NoteService {
 
   final _storage = const FlutterSecureStorage();
 
-  // --- Hàm lấy toàn bộ danh sách Ghi chú ---
+  // --- Hàm lấy toàn bộ danh sách Ghi chú (Hỗ trợ Offline) ---
   // THÊM: Tham số searchQuery trong ngoặc nhọn (có thể null)
+  // Nếu searchQuery có giá trị thì sẽ được tự động gắn vào URL dưới dạng ?SearchTerm=...
+  // --- Hàm Lấy danh sách Ghi chú (Hỗ trợ Offline) ---
   Future<List<Note>> getAllNotes({String? searchQuery}) async {
     try {
       debugPrint('Đang yêu cầu lấy danh sách Ghi chú từ Server...');
 
-      // 1. MỞ KÉT SẮT LẤY CHÌA KHÓA (TOKEN)
+      // 1. LẤY TOKEN
       String? token = await _storage.read(key: 'jwt_token');
-
-      // Nếu không có token, báo lỗi ngay lập tức
       if (token == null || token.isEmpty) {
         throw Exception('Chưa đăng nhập!');
       }
 
-      // TẠO URL THÔNG MINH: Nếu có từ khóa thì gắn thêm ?SearchTerm=...
+      // 2. TẠO URL THÔNG MINH
       String requestUrl = baseUrl;
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
-        // Uri.encodeComponent giúp mã hóa các dấu cách, ký tự đặc biệt tiếng Việt an toàn
         requestUrl =
             '$baseUrl?SearchTerm=${Uri.encodeComponent(searchQuery.trim())}';
       }
 
-      // 2. GỌI API VÀ XUẤT TRÌNH THẺ CĂN CƯỚC (HEADER AUTHORIZATION)
-      final response = await http.get(
-        Uri.parse(requestUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      // 3. XỬ LÝ KẾT QUẢ TRẢ VỀ
-      if (response.statusCode == 200) {
-        final dynamic decodedResponse = jsonDecode(response.body);
-        List<dynamic> jsonList = [];
+      // 3. THỬ GỌI API SERVER (CÓ MẠNG)
+      try {
+        final response = await http
+            .get(
+              Uri.parse(requestUrl),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+            )
+            .timeout(const Duration(seconds: 5)); // Đợi tối đa 5s
 
-        // Kiểm tra xem C# trả về Hộp (Map - PagedResult) hay Khay (List trực tiếp)
-        if (decodedResponse is Map<String, dynamic>) {
-          // Trích xuất mảng dữ liệu từ biến 'items' hoặc 'data' bên trong PagedResult
-          jsonList = decodedResponse['items'] ?? decodedResponse['data'] ?? [];
-        } else if (decodedResponse is List) {
-          jsonList = decodedResponse;
+        // --- XỬ LÝ KHI CÓ MẠNG ---
+        if (response.statusCode == 200) {
+          final dynamic decodedResponse = jsonDecode(response.body);
+          List<dynamic> jsonList = [];
+
+          if (decodedResponse is Map<String, dynamic>) {
+            jsonList =
+                decodedResponse['items'] ?? decodedResponse['data'] ?? [];
+          } else if (decodedResponse is List) {
+            jsonList = decodedResponse;
+          }
+
+          List<Note> notes = jsonList
+              .map((json) => Note.fromJson(json))
+              .toList();
+
+          // LƯU OFFLINE: Chỉ lưu khi không tìm kiếm
+          if (searchQuery == null || searchQuery.trim().isEmpty) {
+            debugPrint('Đang lưu ${notes.length} ghi chú vào SQLite...');
+            await DatabaseHelper.instance.cacheNotes(notes);
+          }
+
+          return notes;
+        } else if (response.statusCode == 401) {
+          throw Exception('TOKEN_EXPIRED');
+        } else {
+          throw Exception('Lỗi Server: ${response.statusCode}');
+        }
+      }
+      // 4. BẮT LỖI KHI MẤT MẠNG HOẶC SERVER SẬP
+      catch (e) {
+        // NẾU LÀ LỖI HẾT HẠN TOKEN THÌ KHÔNG ĐƯỢC LẤY OFFLINE, ĐÁ VĂNG LUÔN
+        if (e.toString().contains('TOKEN_EXPIRED')) {
+          rethrow;
         }
 
-        // Đưa mảng lấy được qua dây chuyền lắp ráp Note.fromJson
-        List<Note> notes = jsonList.map((json) => Note.fromJson(json)).toList();
+        // --- BẬT CHẾ ĐỘ OFFLINE ---
+        debugPrint('⚠️ Lỗi kết nối Server: $e');
+        debugPrint('🔄 Đang lấy dữ liệu từ Kho Offline (SQLite)...');
 
-        debugPrint('Đã tải thành công ${notes.length} ghi chú!');
-        return notes;
-      } else if (response.statusCode == 401) {
-        throw Exception('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-      } else {
-        throw Exception('Lỗi Server: ${response.statusCode}');
+        final offlineNotes = await DatabaseHelper.instance.getOfflineNotes();
+
+        if (offlineNotes.isNotEmpty) {
+          return offlineNotes;
+        } else {
+          throw Exception('Không có kết nối mạng và chưa có dữ liệu Offline!');
+        }
       }
-    } catch (e) {
+    }
+    // 5. BẮT LỖI TỔNG QUÁT BÊN NGOÀI CÙNG
+    catch (e) {
       debugPrint('Lỗi NoteService (getAllNotes): $e');
-      rethrow; // Đẩy lỗi lên cho UI xử lý (VD: Hiển thị SnackBar)
+      rethrow;
     }
   }
 

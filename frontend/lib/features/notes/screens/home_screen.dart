@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final errorMsg = snapshot.error.toString();
 
             // --- RADAR KÍCH HOẠT TẠI ĐÂY ---
-            if (errorMsg.contains('Phiên đăng nhập hết hạn')) {
+            if (errorMsg.contains('TOKEN_EXPIRED')) {
               // Lưu ý: Không thể chuyển trang ngay lúc Flutter đang vẽ giao diện (build).
               // Phải dùng addPostFrameCallback để hẹn "Vẽ xong màn hình này thì đá người dùng ra ngay!"
               WidgetsBinding.instance.addPostFrameCallback((_) {
