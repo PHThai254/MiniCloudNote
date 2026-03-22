@@ -183,6 +183,19 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: notes.length,
             itemBuilder: (context, index) {
               final note = notes[index];
+              // --- THÊM BẢNG MÀU PASTEL KIỂU GOOGLE KEEP ---
+              final List<Color> pastelColors = [
+                const Color(0xFFFFF475), // Vàng chanh
+                const Color(0xFFCCFF90), // Xanh lá mạ
+                const Color(0xFFCBF0F8), // Xanh dương nhạt
+                const Color(0xFFF28B82), // Đỏ cam nhạt
+                const Color(0xFFFDCFE8), // Hồng phấn
+                const Color(0xFFE6C9A8), // Nâu nhạt
+                const Color(0xFFD7AEFB), // Tím nhạt
+              ];
+              // Bốc 1 màu ngẫu nhiên nhưng cố định dựa vào ID của ghi chú
+              final noteColor =
+                  pastelColors[note.id.hashCode.abs() % pastelColors.length];
 
               // BỌC THẺ CARD BẰNG DISMISSIBLE
               return Dismissible(
@@ -275,6 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // 4. ĐÂY CHÍNH LÀ CÁI THẺ CARD GIAO DIỆN CŨ CỦA BẠN
                 child: Card(
+                  color: noteColor, // Thêm dòng này để tô màu nền cho mỗi thẻ
                   elevation: 2,
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
@@ -302,7 +316,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AddNoteScreen(note: note),
+                          builder: (context) => AddNoteScreen(
+                            note: note,
+                            backgroundColor: noteColor, // Truyền màu nền xuống
+                          ),
                         ),
                       );
                       if (result == true) _loadNotes();
