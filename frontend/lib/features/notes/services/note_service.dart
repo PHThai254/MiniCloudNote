@@ -5,6 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/core/api_config.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
 import 'package:frontend/features/notes/services/database_helper.dart';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart'; // Dùng để định nghĩa MediaType
 
 class NoteService {
   // Đường dẫn API lấy danh sách ghi chú (Vẫn dùng 127.0.0.1 và cổng 5265 qua cáp USB)
@@ -202,6 +204,74 @@ class NoteService {
     } catch (e) {
       debugPrint('Lỗi NoteService (Xóa): $e');
       throw Exception('Không thể xóa: $e');
+    }
+  }
+
+  // --- Hàm Upload Ảnh và lấy Link trực tiếp ---
+  Future<String> uploadImage(File imageFile) async {
+    try {
+      debugPrint('Đang đóng gói ảnh gửi lên Server...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      // 1. CHUYẾN XE TẢI CHỞ FILE (POST: /upload)
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/upload'));
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Trích xuất đuôi file (jpg, png...)
+      String ext = imageFile.path.split('.').last.toLowerCase();
+      String subType = 'jpeg'; // Mặc định là jpeg
+      if (ext == 'png') {
+        subType = 'png';
+      } else if (ext == 'gif') {
+        subType = 'gif';
+      } else if (ext == 'webp') {
+        subType = 'webp';
+      }
+      // Nhấc bức ảnh lên xe. Tên field 'File' phải khớp 100% với tên biến bên C#
+      var multipartFile = await http.MultipartFile.fromPath(
+        'File',
+        imageFile.path,
+        contentType: MediaType('image', subType),
+      );
+      request.files.add(multipartFile);
+
+      // Nhấn ga gửi đi
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // C# trả về: { "fileName": "...", "message": "..." }
+        final fileName = data['fileName'] ?? data['FileName'];
+
+        debugPrint('Upload thành công! Tên file trên MinIO: $fileName');
+
+        // 2. CHẠY XE MÁY LÊN XIN LẠI LINK ẢNH (GET: /file/{fileName})
+        // Vì C# tách riêng hàm GetFileUrl ra, nên ta gọi luôn để lấy link xịn trả về cho UI
+        final linkResponse = await http.get(
+          Uri.parse('$baseUrl/file/$fileName'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+
+        if (linkResponse.statusCode == 200) {
+          final linkData = jsonDecode(linkResponse.body);
+          final imageUrl = linkData['url'] ?? linkData['Url'];
+          debugPrint('Đã lấy được Link ảnh: $imageUrl');
+
+          return imageUrl; // Trả về link http://... để hiển thị
+        } else {
+          throw Exception('Upload xong nhưng không lấy được link ảnh!');
+        }
+      } else {
+        throw Exception(
+          'Lỗi Upload Server: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (uploadImage): $e');
+      throw Exception('Không thể tải ảnh lên: $e');
     }
   }
 }

@@ -65,14 +65,16 @@ namespace MiniCloudNote.Infrastructure.Services
             // Kiểm tra tên file có hợp lệ không
             if (string.IsNullOrEmpty(fileName)) return string.Empty;
 
-            // Tạo yêu cầu lấy link (Presigned URL)
-            var args = new PresignedGetObjectArgs()
-                .WithBucket(_bucketName)
-                .WithObject(fileName)
-                .WithExpiry(60 * 60); // Link sống trong 3600 giây (1 tiếng)
+            // Khi Frontend test UI bằng Emulator: 10.0.2.2 là "cánh cửa thần kỳ" để máy ảo Android nhìn thấy Windows
+            // Khi Frontend test UI bằng điện thoại thật: 192.168.x.x (IP của máy tính trong mạng LAN)
+            // Khi test bằng điện thoại thật qua cáp USB
+            string minioBaseUrl = "http://127.0.0.1:9000";
 
-            // MinIO sẽ ký tên vào link này
-            return await _minioClient.PresignedGetObjectAsync(args);
+            // Ráp lại thành link xịn (Dùng luôn biến _bucketName đã có sẵn trong class của bạn)
+            string publicUrl = $"{minioBaseUrl}/{_bucketName}/{fileName}";
+
+            // Trả về trực tiếp luôn
+            return await Task.FromResult(publicUrl);
         }
 
         public Task DeleteFileAsync(string fileName)

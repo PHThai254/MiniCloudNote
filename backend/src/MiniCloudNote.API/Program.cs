@@ -231,7 +231,7 @@ if (!isTesting)
     RecurringJob.AddOrUpdate("system-report", () => Console.WriteLine("--> [UPDATE DAY 52] System is running SUPER HEALTHY v3.0 !!!"), Cron.Minutely);
 }
 
-await app.RunAsync();
+await app.RunAsync("http://0.0.0.0:5265");
 
 // Dòng này bắt buộc để Integration Test nhìn thấy
 public partial class Program { }
