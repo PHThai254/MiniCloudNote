@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/login_screen.dart'; // ĐÃ THÊM IMPORT NÀY
 import 'package:frontend/features/auth/services/auth_service.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
+import 'package:frontend/features/notes/screens/trash_screen.dart';
 import 'package:frontend/features/notes/services/note_service.dart';
 import 'package:frontend/features/notes/screens/add_note_screen.dart';
 
@@ -83,23 +84,34 @@ class _HomeScreenState extends State<HomeScreen> {
           // Chỉ hiện nút Đăng xuất khi KHÔNG tìm kiếm (cho đỡ chật chỗ)
           if (!_isSearching)
             IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Đăng xuất',
+              icon: const Icon(Icons.delete_outline), // Nút Thùng Rác
+              tooltip: 'Thùng rác',
               onPressed: () async {
-                // ĐÃ FIX: Chờ Service xóa token xong thì tự chuyển trang
-                await AuthService().logoutUser();
-
-                if (context.mounted) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                    (route) => false,
-                  );
-                }
+                // Đi sang màn hình Thùng Rác, khi quay về thì load lại màn Home
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TrashScreen()),
+                );
+                _loadNotes(); // Cập nhật lại danh sách lỡ có ghi chú được phục hồi
               },
             ),
+
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Đăng xuất',
+            onPressed: () async {
+              // ĐÃ FIX: Chờ Service xóa token xong thì tự chuyển trang
+              await AuthService().logoutUser();
+
+              if (context.mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+          ),
         ],
       ),
       // --- SỨC MẠNH CỦA FUTUREBUILDER NẰM Ở ĐÂY ---

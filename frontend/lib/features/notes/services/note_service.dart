@@ -274,4 +274,104 @@ class NoteService {
       throw Exception('Không thể tải ảnh lên: $e');
     }
   }
+
+  // --- Hàm lấy danh sách ghi chú trong Thùng rác ---
+  Future<List<Note>> getTrashNotes({String? searchQuery}) async {
+    try {
+      debugPrint('Đang yêu cầu lấy danh sách Thùng rác từ Server...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      // Tạo URL kèm phân trang/tìm kiếm nếu có
+      String requestUrl = '$baseUrl/trash';
+      if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+        requestUrl += '?SearchTerm=${Uri.encodeComponent(searchQuery.trim())}';
+      }
+
+      final response = await http
+          .get(
+            Uri.parse(requestUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final dynamic decodedResponse = jsonDecode(response.body);
+        List<dynamic> jsonList = [];
+
+        if (decodedResponse is Map<String, dynamic>) {
+          jsonList = decodedResponse['items'] ?? decodedResponse['data'] ?? [];
+        } else if (decodedResponse is List) {
+          jsonList = decodedResponse;
+        }
+
+        return jsonList.map((json) => Note.fromJson(json)).toList();
+      } else {
+        throw Exception('Lỗi Server: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (getTrashNotes): $e');
+      throw Exception('Không thể tải thùng rác: $e');
+    }
+  }
+
+  // --- Hàm Phục hồi ghi chú ---
+  Future<bool> restoreNote(String id) async {
+    try {
+      debugPrint('Đang yêu cầu phục hồi Ghi chú ID: $id...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/$id/restore'), // Route: /api/Notes/{id}/restore
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Đã phục hồi thành công!');
+        return true;
+      } else {
+        throw Exception('Lỗi Server: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (restoreNote): $e');
+      throw Exception('Không thể phục hồi: $e');
+    }
+  }
+
+  // --- Hàm Xóa Vĩnh Viễn (Hard Delete) ---
+  Future<bool> hardDeleteNote(String id) async {
+    try {
+      debugPrint('Đang yêu cầu xóa vĩnh viễn Ghi chú ID: $id...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$id/hard'), // Route: /api/Notes/{id}/hard
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        debugPrint('Đã xóa vĩnh viễn thành công!');
+        return true;
+      } else {
+        throw Exception('Lỗi Server: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (hardDeleteNote): $e');
+      throw Exception('Không thể xóa vĩnh viễn: $e');
+    }
+  }
 }

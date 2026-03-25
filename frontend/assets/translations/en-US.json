@@ -2,8 +2,6 @@
   "login": {
     "title": "Let's Login",
     "subtitle": "And notes your idea",
-    "fullname_label": "Full Name",
-    "fullname_hint": "Example: John Doe",
     "email_label": "Email Address",
     "email_hint": "Example: johndoe@gmail.com",
     "password_label": "Password",
@@ -12,6 +10,18 @@
     "submit_btn": "Login",
     "no_account": "Don't have any account?",
     "register_here": "Register here",
+    "error_empty": "Please fill in all information!"
+  },
+  "register": {
+    "title": "Register",
+    "subtitle": "Create your new account",
+    "fullname_label": "Full Name",
+    "fullname_hint": "Example: John Doe",
+    "email_label": "Email Address",
+    "email_hint": "Example: johndoe@gmail.com",
+    "password_label": "Password",
+    "password_hint": "********",
+    "submit_btn": "Register",
     "error_empty": "Please fill in all information!",
     "success_msg": "Registration successful! Please login."
   },

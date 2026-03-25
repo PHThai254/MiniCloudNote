@@ -5,10 +5,10 @@ import 'package:frontend/features/auth/screens/login_screen.dart';
 import 'package:frontend/features/notes/screens/home_screen.dart';
 
 void main() async {
-  // Bắt buộc phải có dòng này khi khởi tạo các dịch vụ Native/Package trước khi chạy app
+  // Bắt buộc phải có dòng này để Flutter khởi tạo các dịch vụ ngầm (như bộ nhớ máy) trước khi chạy UI
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Đánh thức anh phiên dịch viên
+  // Đánh thức "Trí nhớ siêu phàm" của Easy Localization
   await EasyLocalization.ensureInitialized();
 
   runApp(
@@ -19,6 +19,9 @@ void main() async {
         'vi',
         'VN',
       ), // Nếu lỗi, tự động về Tiếng Việt
+
+      saveLocale:
+          true, // SHARED PREFERENCES: Tự động nhớ lựa chọn ngôn ngữ của người dùng
       child: const MiniCloudNoteApp(),
     ),
   );

@@ -2,8 +2,6 @@
 "login": {
     "title": "Đăng nhập",
     "subtitle": "Ghi chú mọi ý tưởng của bạn",
-    "fullname_label": "Họ và tên",
-    "fullname_hint": "Ví dụ: John Doe",
     "email_label": "Địa chỉ Email",
     "email_hint": "Ví dụ: johndoe@gmail.com",
     "password_label": "Mật khẩu",
@@ -12,6 +10,18 @@
     "submit_btn": "Đăng nhập",
     "no_account": "Bạn chưa có tài khoản?",
     "register_here": "Đăng ký tại đây",
+    "error_empty": "Vui lòng điền đầy đủ thông tin!"
+    },
+    "register": {
+    "title": "Đăng ký",
+    "subtitle": "Tạo tài khoản mới của bạn",
+    "fullname_label": "Họ và tên",
+    "fullname_hint": "Ví dụ: John Doe",
+    "email_label": "Địa chỉ Email",
+    "email_hint": "Ví dụ: johndoe@gmail.com",
+    "password_label": "Mật khẩu",
+    "password_hint": "********",
+    "submit_btn": "Đăng ký",
     "error_empty": "Vui lòng điền đầy đủ thông tin!",
     "success_msg": "Đăng ký thành công! Vui lòng đăng nhập."
     },
