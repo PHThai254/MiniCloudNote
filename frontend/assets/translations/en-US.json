@@ -27,6 +27,9 @@
     "EMAIL_ALREADY_EXISTS": "This email is already in use!",
     "USERNAME_ALREADY_EXISTS": "Username already exists!",
     "WEAK_PASSWORD": "Password is too weak (min 6 characters)!"
-
+  },
+  "note_detail": {
+    "chars": "characters",
+    "just_now": "Just now"
   }
 }

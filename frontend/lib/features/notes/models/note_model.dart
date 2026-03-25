@@ -3,23 +3,34 @@ class Note {
   final String title;
   final String content;
   final DateTime? createdAt;
+  final DateTime? updatedAt; // THÊM DÒNG NÀY: Ngày chỉnh sửa gần nhất
 
-  Note({this.id, required this.title, required this.content, this.createdAt});
+  Note({
+    this.id,
+    required this.title,
+    required this.content,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   // --- HÀM 1: Nhận hàng từ C# (Từ JSON -> Dart Object) ---
-  // ASP.NET Core mặc định trả về JSON dạng camelCase (chữ cái đầu viết thường)
   factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
       // Ép thẳng sang chuỗi (String) vì Backend dùng Guid
       id: json['id']?.toString(),
-      title:
-          json['title'] ??
-          'Không có tiêu đề', // Nếu null thì gán giá trị mặc định
+      title: json['title'] ?? '', // Nếu null thì gán giá trị mặc định
       content: json['content'] ?? '',
-      // Chuyển chuỗi thời gian của C# thành đối tượng DateTime của Dart
+
+      // Phân tích Ngày Tạo: Chuyển chuỗi thời gian của C# thành đối tượng DateTime của Dart
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : null,
+      // Phân tích Ngày Cập Nhật (Nếu không có updatedAt, lấy tạm createdAt)
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : (json['createdAt'] != null
+                ? DateTime.parse(json['createdAt'])
+                : null),
     );
   }
 
@@ -31,6 +42,7 @@ class Note {
       'content': content,
       // Khi gửi lên C# thường gửi dạng chuỗi ISO 8601
       'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

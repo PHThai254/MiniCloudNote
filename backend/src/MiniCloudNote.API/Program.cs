@@ -228,7 +228,7 @@ app.MapControllers();
 if (!isTesting)
 {
     // Cron.Minutely: Chạy mỗi phút 1 lần (để test cho nhanh)
-    RecurringJob.AddOrUpdate("system-report", () => Console.WriteLine("--> [UPDATE DAY 52] System is running SUPER HEALTHY v3.0 !!!"), Cron.Minutely);
+    RecurringJob.AddOrUpdate("system-report", () => Console.WriteLine("--> System is running SUPER HEALTHY v3.0 !!!"), Cron.Minutely);
 }
 
 await app.RunAsync("http://0.0.0.0:5265");

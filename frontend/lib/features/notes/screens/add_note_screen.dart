@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
@@ -7,8 +8,7 @@ import 'package:flutter_markdown/flutter_markdown.dart'; // Dùng để hiển t
 
 class AddNoteScreen extends StatefulWidget {
   final Note? note;
-  final Color?
-  backgroundColor; // THÊM BIẾN NÀY: Để nhận màu từ HomeScreen truyền sang
+  final Color? backgroundColor; //Để nhận màu từ HomeScreen truyền sang
 
   const AddNoteScreen({super.key, this.note, this.backgroundColor});
 
@@ -84,6 +84,21 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _contentController.text = widget.note!.content;
+    }
+  }
+
+  // --- HÀM FORMAT NGÀY THÁNG ĐA NGÔN NGỮ ---
+  String _getFormattedDate() {
+    if (widget.note == null || widget.note!.updatedAt == null) {
+      return 'note_detail.just_now'.tr(); // Ghi chú mới -> Hiện "Vừa xong"
+    }
+
+    final date = widget.note!.updatedAt!.toLocal();
+
+    if (context.locale.languageCode == 'vi') {
+      return DateFormat('dd \'tháng\' MM HH:mm').format(date);
+    } else {
+      return DateFormat('MMM dd, HH:mm').format(date);
     }
   }
 
@@ -221,7 +236,41 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 border: InputBorder.none, // <--- XÓA ĐƯỜNG GẠCH CHÂN
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
+
+            // --- THANH THÔNG TIN (NGÀY + SỐ KÝ TỰ) ---
+            Row(
+              children: [
+                // Ngày chỉnh sửa
+                Text(
+                  _getFormattedDate(),
+                  style: const TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+                // Dấu gạch dọc ngăn cách
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    '|',
+                    style: TextStyle(color: Colors.black54, fontSize: 13),
+                  ),
+                ),
+                // Đếm số ký tự Real-time bằng ValueListenableBuilder
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _contentController,
+                  builder: (context, value, child) {
+                    return Text(
+                      '${value.text.length} ${'note_detail.chars'.tr()}',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            // ---------------------------------------------------
+            const SizedBox(height: 15),
 
             // Ô NHẬP NỘI DUNG (Hoặc hiển thị Markdown)
             Expanded(

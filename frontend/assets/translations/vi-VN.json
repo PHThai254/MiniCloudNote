@@ -27,5 +27,9 @@
         "EMAIL_ALREADY_EXISTS": "Email này đã được sử dụng!",
         "USERNAME_ALREADY_EXISTS": "Tên người dùng đã tồn tại!",
         "WEAK_PASSWORD": "Mật khẩu quá yếu (cần ít nhất 6 ký tự)!"
+    },
+    "note_detail": {
+        "chars": "ký tự",
+        "just_now": "Vừa xong"
     }
 }
