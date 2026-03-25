@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/screens/register_screen.dart';
 import 'package:frontend/features/auth/services/auth_service.dart';
@@ -35,33 +36,55 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              // --- Header ---
-              const Text(
-                'Let\'s Login',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              // --- Header có gắn nút Quả cầu ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'login.title'.tr(), // Đã dịch
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.language, color: Colors.deepPurple),
+                    onPressed: () {
+                      if (context.locale.languageCode == 'vi') {
+                        context.setLocale(
+                          const Locale('en', 'US'),
+                        ); // Đã thêm 'US'
+                      } else {
+                        context.setLocale(
+                          const Locale('vi', 'VN'),
+                        ); // Đã thêm 'VN'
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
-              const Text(
-                'And notes your idea',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+              Text(
+                'login.subtitle'.tr(), // Đã dịch
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 50),
 
               // --- Email Input ---
-              const Text(
-                'Email Address',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                'login.email_label'.tr(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'Example: johndoe@gmail.com',
+                  hintText: 'login.email_hint'.tr(), // Đã dịch
                   hintStyle: const TextStyle(color: Colors.black38),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -89,16 +112,19 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
 
               // --- Password Input ---
-              const Text(
-                'Password',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                'login.password_label'.tr(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
-                  hintText: '********',
+                  hintText: 'login.password_hint'.tr(),
                   hintStyle: const TextStyle(color: Colors.black38),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -148,9 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     minimumSize: const Size(50, 30),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
-                    'Forgot Password',
-                    style: TextStyle(
+                  child: Text(
+                    'login.forgot_password'.tr(),
+                    style: const TextStyle(
                       color: Colors.deepPurple,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -170,8 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Vui lòng điền đầy đủ thông tin!'),
+                            SnackBar(
+                              content: Text('login.error_empty'.tr()),
                               backgroundColor: Colors.red,
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -184,21 +210,38 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
 
                         try {
-                          // CẬP NHẬT: Đợi Service trả về kết quả đăng nhập (true/false)
-                          final isSuccess = await AuthService().loginUser(
-                            context,
+                          // Bắt kết quả trả về từ Service (null nếu thành công, hoặc là một Mã Lỗi)
+                          final errorCode = await AuthService().loginUser(
                             email,
                             password,
                           );
-                          // Thêm tấm khiên bảo vệ context ở đây
+
                           if (!context.mounted) return;
 
-                          // Nếu thành công và màn hình vẫn tồn tại -> Chuyển bánh!
-                          if (isSuccess) {
+                          // Nếu errorCode là null -> Đăng nhập thành công!
+                          if (errorCode == null) {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          }
+                          // Nếu có lỗi -> Lấy mã lỗi, dịch và hiện lên màn hình
+                          else {
+                            String translationKey = 'errors.$errorCode';
+                            String localizedMessage = translationKey.tr();
+
+                            // Nếu không tìm thấy bản dịch, hiện lỗi mặc định
+                            if (localizedMessage == translationKey) {
+                              localizedMessage = 'errors.UNKNOWN_ERROR'.tr();
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(localizedMessage),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
                               ),
                             );
                           }
@@ -231,9 +274,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           strokeWidth: 2.5,
                         ),
                       )
-                    : const Text(
-                        'Login',
-                        style: TextStyle(
+                    : Text(
+                        'login.submit_btn'.tr(),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -245,9 +288,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Don\'t have any account? ',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    '${'login.no_account'.tr()} ',
+                    style: const TextStyle(color: Colors.grey),
                   ),
                   TextButton(
                     onPressed: () {
@@ -263,9 +306,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       minimumSize: const Size(50, 30),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text(
-                      'Register here',
-                      style: TextStyle(
+                    child: Text(
+                      'login.register_here'.tr(),
+                      style: const TextStyle(
                         color: Colors.deepPurple,
                         fontWeight: FontWeight.bold,
                       ),

@@ -59,14 +59,22 @@ namespace MiniCloudNote.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var token = await _authService.LoginAsync(request.Username, request.Password);
+            try
+            {
+                var token = await _authService.LoginAsync(request.Username, request.Password);
 
             if (token == null)
             {
-                return Unauthorized(new { message = "Sai tài khoản hoặc mật khẩu." });
+                return BadRequest(new { message = "INVALID_CREDENTIALS" });
             }
-
-            return Ok(new { token = token });
+            return Ok(new { token = token });    
+            }
+            catch (Exception)
+            {
+                // Nếu _authService ném ra lỗi (VD: "Sai mật khẩu", "Không tìm thấy User")
+                // Ta bắt lại hết và trả về mã lỗi chuẩn để Flutter tự dịch
+                return BadRequest(new { message = "INVALID_CREDENTIALS" });
+            }
   
         }
 
@@ -83,14 +91,14 @@ namespace MiniCloudNote.API.Controllers
 
             if (userId == null)
             {
-                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng." });
+                return BadRequest(new { message = "USER_NOT_FOUND" });
             }
             
             // 2. Tìm User trong Database
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound("Tài khoản không tồn tại. ");
+                return BadRequest(new { message = "USER_NOT_FOUND" });
             }
 
             // 3. Thực hiện đổi mật khẩu
@@ -99,8 +107,8 @@ namespace MiniCloudNote.API.Controllers
 
             if (!result.Succeeded)
             {
-                // Trả về lỗi (ví dụ: Sai mật khẩu cũ, mật khẩu mới không đủ mạnh....)
-                return BadRequest(result.Errors);
+                // Identity trả về mảng Errors. Tạm thời mình trả về mã lỗi chung chung
+                return BadRequest(new { message = "CHANGE_PASSWORD_FAILED" });
             }
 
             return Ok(new { Message = "Đổi mật khẩu thành công!" });

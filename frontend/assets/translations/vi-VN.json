@@ -1,0 +1,31 @@
+{
+"login": {
+    "title": "Đăng nhập",
+    "subtitle": "Ghi chú mọi ý tưởng của bạn",
+    "fullname_label": "Họ và tên",
+    "fullname_hint": "Ví dụ: John Doe",
+    "email_label": "Địa chỉ Email",
+    "email_hint": "Ví dụ: johndoe@gmail.com",
+    "password_label": "Mật khẩu",
+    "password_hint": "********",
+    "forgot_password": "Quên mật khẩu?",
+    "submit_btn": "Đăng nhập",
+    "no_account": "Bạn chưa có tài khoản?",
+    "register_here": "Đăng ký tại đây",
+    "error_empty": "Vui lòng điền đầy đủ thông tin!",
+    "success_msg": "Đăng ký thành công! Vui lòng đăng nhập."
+    },
+    "notes": {
+        "empty_msg": "Chưa có ghi chú nào!",
+        "add_new": "Thêm ghi chú"
+    },
+    "errors": {
+        "USER_NOT_FOUND": "Tài khoản này không tồn tại!",
+        "INVALID_CREDENTIALS": "Email hoặc mật khẩu không đúng!",
+        "NETWORK_ERROR": "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!",
+        "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định!",
+        "EMAIL_ALREADY_EXISTS": "Email này đã được sử dụng!",
+        "USERNAME_ALREADY_EXISTS": "Tên người dùng đã tồn tại!",
+        "WEAK_PASSWORD": "Mật khẩu quá yếu (cần ít nhất 6 ký tự)!"
+    }
+}

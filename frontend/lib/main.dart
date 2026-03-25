@@ -1,12 +1,27 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-// Import file login_screen.dart mà bạn vừa tạo
 import 'package:frontend/features/auth/screens/login_screen.dart';
 import 'package:frontend/features/notes/screens/home_screen.dart';
 
-void main() {
-  runApp(const MiniCloudNoteApp());
+void main() async {
+  // Bắt buộc phải có dòng này khi khởi tạo các dịch vụ Native/Package trước khi chạy app
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Đánh thức anh phiên dịch viên
+  await EasyLocalization.ensureInitialized();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+      path: 'assets/translations', // Chỉ đường đến kho từ điển JSON của bạn
+      fallbackLocale: const Locale(
+        'vi',
+        'VN',
+      ), // Nếu lỗi, tự động về Tiếng Việt
+      child: const MiniCloudNoteApp(),
+    ),
+  );
 }
 
 class MiniCloudNoteApp extends StatelessWidget {
@@ -26,6 +41,11 @@ class MiniCloudNoteApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MiniCloudNote',
+
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

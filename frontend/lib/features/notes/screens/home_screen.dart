@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/features/auth/screens/login_screen.dart'; // ĐÃ THÊM IMPORT NÀY
 import 'package:frontend/features/auth/services/auth_service.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
 import 'package:frontend/features/notes/services/note_service.dart';
@@ -84,8 +85,19 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.logout),
               tooltip: 'Đăng xuất',
-              onPressed: () {
-                AuthService().logoutUser(context);
+              onPressed: () async {
+                // ĐÃ FIX: Chờ Service xóa token xong thì tự chuyển trang
+                await AuthService().logoutUser();
+
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
+                }
               },
             ),
         ],
@@ -107,9 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // --- RADAR KÍCH HOẠT TẠI ĐÂY ---
             if (errorMsg.contains('TOKEN_EXPIRED')) {
-              // Lưu ý: Không thể chuyển trang ngay lúc Flutter đang vẽ giao diện (build).
-              // Phải dùng addPostFrameCallback để hẹn "Vẽ xong màn hình này thì đá người dùng ra ngay!"
-              WidgetsBinding.instance.addPostFrameCallback((_) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
@@ -118,8 +128,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: Colors.orange,
                   ),
                 );
-                // Gọi hàm của bạn để dọn két sắt và đá văng ra ngoài
-                AuthService().logoutUser(context);
+                // ĐÃ FIX: Tự xóa token và chuyển trang
+                await AuthService().logoutUser();
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
+                }
               });
 
               // Trong 1 tíc tắc chờ bị đá ra ngoài, hiển thị tạm vòng xoay

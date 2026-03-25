@@ -1,0 +1,32 @@
+{
+  "login": {
+    "title": "Let's Login",
+    "subtitle": "And notes your idea",
+    "fullname_label": "Full Name",
+    "fullname_hint": "Example: John Doe",
+    "email_label": "Email Address",
+    "email_hint": "Example: johndoe@gmail.com",
+    "password_label": "Password",
+    "password_hint": "********",
+    "forgot_password": "Forgot Password",
+    "submit_btn": "Login",
+    "no_account": "Don't have any account?",
+    "register_here": "Register here",
+    "error_empty": "Please fill in all information!",
+    "success_msg": "Registration successful! Please login."
+  },
+  "notes": {
+    "empty_msg": "No notes yet!",
+    "add_new": "Add Note"
+  },
+  "errors": {
+    "USER_NOT_FOUND": "This account does not exist!",
+    "INVALID_CREDENTIALS": "Invalid email or password!",
+    "NETWORK_ERROR": "Cannot connect to the server. Please check your network!",
+    "UNKNOWN_ERROR": "An unknown error occurred!",
+    "EMAIL_ALREADY_EXISTS": "This email is already in use!",
+    "USERNAME_ALREADY_EXISTS": "Username already exists!",
+    "WEAK_PASSWORD": "Password is too weak (min 6 characters)!"
+
+  }
+}

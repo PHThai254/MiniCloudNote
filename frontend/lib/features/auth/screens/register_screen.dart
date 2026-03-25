@@ -1,5 +1,6 @@
+import 'package:easy_localization/easy_localization.dart'; // ĐÃ THÊM ĐỂ DỊCH
 import 'package:flutter/material.dart';
-import 'package:frontend/features/auth/services/auth_service.dart'; // THÊM DÒNG NÀY ĐỂ KẾT NỐI API
+import 'package:frontend/features/auth/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,6 +13,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -31,50 +34,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Nút Back (Quay lại)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(bottom: 16, right: 30),
-                    color: Colors.transparent,
-                    child: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.black87,
-                      size: 28,
+              // --- Nút Back & Nút Quả cầu ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(bottom: 16, right: 30),
+                      color: Colors.transparent,
+                      child: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.black87,
+                        size: 28,
+                      ),
                     ),
                   ),
-                ),
+                  // Nút Quả Cầu
+                  IconButton(
+                    icon: const Icon(Icons.language, color: Colors.deepPurple),
+                    onPressed: () {
+                      if (context.locale.languageCode == 'vi') {
+                        context.setLocale(const Locale('en', 'US'));
+                      } else {
+                        context.setLocale(const Locale('vi', 'VN'));
+                      }
+                    },
+                  ),
+                ],
               ),
 
-              const Text(
-                'Register',
-                style: TextStyle(
+              Text(
+                'register.title'.tr(), // Đã dịch
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Create your new account',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+              Text(
+                'register.subtitle'.tr(), // Đã dịch
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 40),
 
               // --- Full Name Input ---
-              const Text(
-                'Full Name',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                'register.fullname_label'.tr(), // Đã dịch
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  hintText: 'Example: John Doe',
+                  hintText: 'register.fullname_hint'.tr(), // Đã dịch
                   hintStyle: const TextStyle(color: Colors.black38),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -102,16 +121,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 20),
 
               // --- Email Input ---
-              const Text(
-                'Email Address',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                'register.email_label'.tr(), // Đã dịch
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'Example: johndoe@gmail.com',
+                  hintText: 'register.email_hint'.tr(), // Đã dịch
                   hintStyle: const TextStyle(color: Colors.black38),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -139,16 +161,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 20),
 
               // --- Password Input ---
-              const Text(
-                'Password',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                'register.password_label'.tr(), // Đã dịch
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  hintText: '********',
+                  hintText: 'register.password_hint'.tr(), // Đã dịch
                   hintStyle: const TextStyle(color: Colors.black38),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -177,40 +202,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               // --- Register Button ---
               ElevatedButton(
-                onPressed: () async {
-                  final name = _nameController.text;
-                  final email = _emailController.text;
-                  final generatedUsername = email.split('@')[0];
-                  final password = _passwordController.text;
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        final name = _nameController.text;
+                        final email = _emailController.text;
+                        final generatedUsername = email.split('@')[0];
+                        final password = _passwordController.text;
 
-                  // KIỂM TRA RỖNG
-                  if (name.isEmpty || email.isEmpty || password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vui lòng điền đầy đủ thông tin!'),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    return;
-                  }
+                        // KIỂM TRA RỖNG
+                        if (name.isEmpty || email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'register.error_empty'.tr(),
+                              ), // Đã dịch
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
 
-                  // GỌI API ĐĂNG KÝ THẬT SỰ
-                  // 1. Gửi dữ liệu qua AuthService
-                  bool isSuccess = await AuthService().registerUser(
-                    context,
-                    generatedUsername,
-                    name,
-                    email,
-                    password,
-                  );
+                        setState(() {
+                          _isLoading = true;
+                        });
 
-                  // 2. Nếu đăng ký thành công trên Server, đá người dùng về trang Login
-                  if (isSuccess) {
-                    if (!context.mounted) return;
-                    Navigator.pop(context);
-                  }
-                },
+                        try {
+                          // GỌI API ĐĂNG KÝ
+                          final errorCode = await AuthService().registerUser(
+                            generatedUsername,
+                            name,
+                            email,
+                            password,
+                          );
+
+                          if (!context.mounted) return;
+
+                          // THÀNH CÔNG (errorCode là null)
+                          if (errorCode == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'register.success_msg'.tr(),
+                                ), // Đã dịch
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            Navigator.pop(context); // Đá về trang Login
+                          }
+                          // THẤT BẠI (Có errorCode)
+                          else {
+                            String translationKey = 'errors.$errorCode';
+                            String localizedMessage = translationKey.tr();
+
+                            if (localizedMessage == translationKey) {
+                              localizedMessage = 'errors.UNKNOWN_ERROR'.tr();
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(localizedMessage),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (context.mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
@@ -220,10 +286,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Register',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : Text(
+                        'register.submit_btn'.tr(), // Đã dịch
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ],
           ),
