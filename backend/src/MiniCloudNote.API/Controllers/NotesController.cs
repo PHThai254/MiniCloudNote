@@ -42,7 +42,7 @@ namespace MiniCloudNote.API.Controllers
             throw new UnauthorizedAccessException("User ID không hợp lệ.");
         }
 
-        // 1. Lấy danh sách ghi chú của tôi
+        // Lấy danh sách ghi chú của tôi
         // GET: api/Notes?pageIndex=1&pageSize=10&searchTerm=abc&sortBy=created_desc
         [HttpGet]
         public async Task<IActionResult> GetMyNotes([FromQuery] NoteQueryParameters query)
@@ -93,7 +93,7 @@ namespace MiniCloudNote.API.Controllers
             return Ok(notes);
         }
 
-        // 2. Lấy chi tiết 1 ghi chú
+        // Lấy chi tiết 1 ghi chú
         // GET: api/Notes/id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNote(Guid id)
@@ -106,7 +106,7 @@ namespace MiniCloudNote.API.Controllers
             return Ok(note);
         }
 
-        // 3. Tạo ghi chú mới
+        // Tạo ghi chú mới
         [HttpPost]
         public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest request)
         {
@@ -120,7 +120,7 @@ namespace MiniCloudNote.API.Controllers
             return CreatedAtAction(nameof(GetNote), new { id = createdNote.Id }, createdNote);
         }
 
-        // 4. Cập nhật ghi chú
+        // Cập nhật ghi chú
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNote(Guid id, [FromBody] UpdateNoteRequest request)
         {
@@ -134,7 +134,7 @@ namespace MiniCloudNote.API.Controllers
             return Ok(new { message = "Cập nhật thành công!" });
         }
 
-        // 5. Xóa ghi chú
+        // Xóa ghi chú
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNote(Guid id)
         {
@@ -145,7 +145,51 @@ namespace MiniCloudNote.API.Controllers
 
             return Ok(new { message = "Xóa thành công!" });
         }
-        // 6. Upload file
+
+        // KHU VỰC THÙNG RÁC (TRASH BIN)
+        
+        // Lấy danh sách ghi chú trong Thùng rác
+        // GET: api/Notes/trash?pageIndex=1&pageSize=10
+        [HttpGet("trash")]
+        public async Task<IActionResult> GetTrashNotes([FromQuery] NoteQueryParameters query)
+        {
+            var userId = GetUserId();
+            // viết thêm 1 hàm GetTrashNotesAsync bên Service và Repository 
+            // với điều kiện lọc IsDeleted == true.
+            
+            var trashNotes = await _noteService.GetTrashNotesAsync(userId, query);
+            return Ok(trashNotes); // Trả về danh sách rác thật!
+        }
+
+        // Phục hồi ghi chú
+        // PUT: api/Notes/{id}/restore
+        [HttpPut("{id}/restore")]
+        public async Task<IActionResult> RestoreNote(Guid id)
+        {
+            var userId = GetUserId();
+            var isRestored = await _noteService.RestoreNoteAsync(id, userId);
+
+            if (!isRestored) 
+                return NotFound(new { message = "Không tìm thấy ghi chú trong thùng rác hoặc bạn không có quyền." });
+
+            return Ok(new { message = "Đã phục hồi ghi chú thành công!" });
+        }
+
+        // Xóa vĩnh viễn ghi chú
+        // DELETE: api/Notes/{id}/hard
+        [HttpDelete("{id}/hard")]
+        public async Task<IActionResult> HardDeleteNote(Guid id)
+        {
+            var userId = GetUserId();
+            var isDeleted = await _noteService.HardDeleteNoteAsync(id, userId);
+
+            if (!isDeleted) 
+                return NotFound(new { message = "Không tìm thấy ghi chú để xóa vĩnh viễn." });
+
+            return Ok(new { message = "Đã xóa vĩnh viễn ghi chú khỏi hệ thống." });
+        }
+
+        // Upload file
         [HttpPost("upload")]
         [Consumes("multipart/form-data")] // Bắt buộc dòng này để nhận file
         public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
@@ -153,7 +197,7 @@ namespace MiniCloudNote.API.Controllers
             // Lấy ruột ra
             var file = request.File; 
 
-            // 1. Kiểm tra rỗng
+            // Kiểm tra rỗng
             if (file == null || file.Length == 0) 
                 return BadRequest("Vui lòng chọn file để upload.");
 
@@ -170,23 +214,23 @@ namespace MiniCloudNote.API.Controllers
             }
             // ===============================================
 
-            // 2. Kiểm tra MIME Type (Lớp bảo vệ thứ 2)
+            // Kiểm tra MIME Type (Lớp bảo vệ thứ 2)
             if (!file.ContentType.StartsWith("image/"))
                 return BadRequest("Nội dung file không phải là hình ảnh hợp lệ.");
 
-            // 3. Kiểm tra dung lượng (5MB)
+            // Kiểm tra dung lượng (5MB)
             if (file.Length > 5 * 1024 * 1024)
                 return BadRequest("File quá lớn (tối đa 5MB).");
 
             try
             {
-                // 2. Mở Stream để đọc file
+                // Mở Stream để đọc file
                 using var stream = file.OpenReadStream();
 
-                // 3. Gọi Service đẩy lên MinIO
+                // Gọi Service đẩy lên MinIO
                 var fileName = await _storageService.UploadFileAsync(file.FileName, stream, file.ContentType);
 
-                // 4. Trả về đường dẫn (hoặc tên file) cho Client
+                // Trả về đường dẫn (hoặc tên file) cho Client
                 // Client sẽ dùng tên này để nhét vào field "Content" của Note (ví dụ: ![img](fileName))
                 return Ok(new { FileName = fileName, Message = "Upload thành công!" });      
             }
@@ -195,7 +239,7 @@ namespace MiniCloudNote.API.Controllers
                 return StatusCode(500, $"Lỗi upload: {ex.Message}");
             }
         }
-        // 7. Hàm để Frontend gọi vào xin link
+        // Hàm để Frontend gọi vào xin link
         // GET: api/Notes/file/ten-file-dai-ngoang.jpg
         [HttpGet("file/{fileName}")]
         public async Task<IActionResult> GetFileUrl(string fileName)

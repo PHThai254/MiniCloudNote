@@ -38,7 +38,8 @@ namespace MiniCloudNote.Infrastructure.Repositories
             // Lúc này chưa bắn lệnh xuống Database, chỉ mới "lên kế hoạch"
             var queryable = _context.Notes
                                     .AsNoTracking() // Tối ưu hiệu năng cho thao tác chỉ đọc
-                                    .Where(n => n.OwnerId == ownerId); // Luôn luôn đọc theo User trước tiên
+                                    .Where(n => n.OwnerId == ownerId) // Luôn luôn đọc theo User trước tiên
+                                    .Where(n => n.IsDeleted == false); // CHẮC CHẮN KHÔNG LẤY NHỮNG GHI CHÚ ĐÃ BỊ XÓA (nằm trong thùng rác)
             // 2. Tìm kiếm (Search)
             if (!string.IsNullOrWhiteSpace(query.SearchTerm))
             {
@@ -96,6 +97,45 @@ namespace MiniCloudNote.Infrastructure.Repositories
         {
             _context.Notes.Remove(note); // Đánh dấu xóa
             await _context.SaveChangesAsync(); // Gửi lệnh DELETE SQL xuống DB
+        }
+
+        public async Task<PagedResult<Note>> GetPagedTrashAsync(Guid ownerId, NoteQueryParameters query)
+        {
+            var queryable = _context.Notes
+                                    .AsNoTracking()
+                                    .Where(n => n.OwnerId == ownerId)
+                                    .Where(n => n.IsDeleted); // <--- QUAN TRỌNG: Chỉ lấy những đứa đã bị xóa
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                var term = query.SearchTerm.ToLower().Trim();
+                queryable = queryable.Where(n => n.Title.ToLower().Contains(term));
+            }
+
+            // Sort (Sắp xếp ưu tiên những đứa mới bị xóa lên đầu)
+            queryable = query.SortBy switch
+            {
+                "title_asc" => queryable.OrderBy(n => n.Title),
+                "title_desc" => queryable.OrderByDescending(n => n.Title),
+                "created_asc" => queryable.OrderBy(n => n.CreatedAt),
+                _ => queryable.OrderByDescending(n => n.DeletedAt ?? n.CreatedAt) 
+            };
+
+            var totalCount = await queryable.CountAsync();
+
+            var items = await queryable
+                .Skip((query.PageIndex - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<Note>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageIndex = query.PageIndex,
+                PageSize = query.PageSize
+            };
         }
     }
 }

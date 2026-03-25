@@ -24,22 +24,43 @@ namespace MiniCloudNote.Infrastructure.Services
         // 1. Đăng ký (Dùng Identity để tạo User và Hash mật khẩu chuẩn)
         public async Task<User> RegisterAsync(User user, string password)
         {
-            // Hàm CreateAsync này tự động:
-            // - Kiểm tra trùng UserName
-            // - Hash mật khẩu theo chuẩn Identity
-            // - Lưu vào Database
+
             var result = await _userManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
             {
-                // Nếu lỗi (ví dụ: pass yếu, trùng tên...), gom lỗi lại và ném ra
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                throw new Exception(errors);
+                // Lấy lỗi đầu tiên mà Identity trả về
+                var firstError = result.Errors.FirstOrDefault();
+                string errorCode = "UNKNOWN_ERROR";
+
+                if (firstError != null)
+                {
+                    // Map lỗi của Identity sang mã lỗi của API
+                    switch (firstError.Code)
+                    {
+                        case "DuplicateEmail":
+                            errorCode = "EMAIL_ALREADY_EXISTS";
+                            break;
+                        case "DuplicateUserName":
+                            errorCode = "USERNAME_ALREADY_EXISTS";
+                            break;
+                        default:
+                            // Nếu lỗi có chữ "Password" (VD: PasswordTooShort, PasswordRequiresDigit...)
+                            if (firstError.Code.Contains("Password"))
+                            {
+                                errorCode = "WEAK_PASSWORD";
+                            }
+                            else
+                            {
+                                errorCode = "UNKNOWN_ERROR";
+                            }
+                            break;
+                        // Thêm các lỗi khác nếu cần
+                    }
+                }
+                // Ném MÃ LỖI (Ví dụ: "WEAK_PASSWORD") ra cho AuthController hứng
+                throw new Exception(errorCode);   
             }
-
-            // Nếu muốn gán Role mặc định ngay khi đăng ký:
-            // await _userManager.AddToRoleAsync(user, "User");
-
             return user;
         }
 

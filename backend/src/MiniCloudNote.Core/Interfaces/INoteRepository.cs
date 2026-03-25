@@ -23,5 +23,7 @@ namespace MiniCloudNote.Core.Interfaces
 
         // Xóa ghi chú
         Task DeleteAsync(Note note);
+        // Lấy danh sách ghi chú trong thùng rác (Đã bị xóa mềm)
+        Task<PagedResult<Note>> GetPagedTrashAsync(Guid ownerId, NoteQueryParameters query);
     }
 }

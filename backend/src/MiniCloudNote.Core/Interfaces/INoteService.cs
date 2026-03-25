@@ -20,5 +20,13 @@ namespace MiniCloudNote.Core.Interfaces
         // Xóa
         Task<bool> DeleteNoteAsync(Guid noteId, Guid userId);
 
+        Task<PagedResult<NoteResponse>> GetTrashNotesAsync(Guid userId, NoteQueryParameters query);
+
+        // Xoá mềm (Soft Delete - Chuyển vào thùng rác)
+        Task<bool> RestoreNoteAsync(Guid noteId, Guid userId);
+
+        // Xóa vĩnh viễn (Hard Delete)
+        Task<bool> HardDeleteNoteAsync(Guid noteId, Guid userId);
+
     }
 }

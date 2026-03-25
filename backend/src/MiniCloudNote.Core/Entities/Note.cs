@@ -19,6 +19,11 @@ namespace MiniCloudNote.Core.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Thời gian tạo ghi chú
         public DateTime? UpdatedAt { get; set; } // Thời gian cập nhật ghi chú, có thể null
 
+        // --- 2 DÒNG NÀY CHO TÍNH NĂNG THÙNG RÁC ---
+        public bool IsDeleted { get; set; } = false; // false = Bình thường, true = Đã vào thùng rác
+        public DateTime? DeletedAt { get; set; } // Lưu lại thời điểm bị ném vào thùng rác
+        // -----------------------------------------------
+
         // Khóa ngoại lưu ID của user tạo ghi chú
         public Guid OwnerId { get; set; }
 

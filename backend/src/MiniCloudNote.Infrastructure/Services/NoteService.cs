@@ -1,6 +1,9 @@
-using MiniCloudNote.Core.DTOs;      // Dùng DTO từ Core
-using MiniCloudNote.Core.Entities;  // Dùng Entity từ Core
-using MiniCloudNote.Core.Interfaces; // Dùng Interface từ Core
+using MiniCloudNote.Core.DTOs;      
+using MiniCloudNote.Core.Entities;  
+using MiniCloudNote.Core.Interfaces; 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MiniCloudNote.Infrastructure.Services
 {
@@ -8,19 +11,16 @@ namespace MiniCloudNote.Infrastructure.Services
     {
         private readonly INoteRepository _noteRepository;
 
-        // Constructor Injection
         public NoteService(INoteRepository noteRepository)
         {
             _noteRepository = noteRepository;
         }
 
-       // 1. Lấy danh sách ghi chú (ĐÃ NÂNG CẤP PHÂN TRANG)
+        // 1. Lấy danh sách ghi chú (Bình thường)
         public async Task<PagedResult<NoteResponse>> GetUserNotesAsync(Guid userId, NoteQueryParameters query)
         {
-            // Gọi Repository để lấy dữ liệu đã phân trang & lọc từ DB
             var pagedData = await _noteRepository.GetPagedAsync(userId, query);
             
-            // Map từ Entity -> Response DTO (Ẩn thông tin nhạy cảm)
             var noteResponses = pagedData.Items.Select(n => new NoteResponse
             {
                 Id = n.Id,
@@ -30,7 +30,6 @@ namespace MiniCloudNote.Infrastructure.Services
                 UpdatedAt = n.UpdatedAt
             });
 
-            // Đóng gói lại vào PagedResult dành cho DTO
             return new PagedResult<NoteResponse>
             {
                 Items = noteResponses,
@@ -40,13 +39,13 @@ namespace MiniCloudNote.Infrastructure.Services
             };
         }
         
-        // 2. Lấy chi tiết 1 ghi chú (Có kiểm tra quyền sở hữu)
+        // 2. Lấy chi tiết 1 ghi chú
         public async Task<NoteResponse?> GetNoteByIdAsync(Guid noteId, Guid userId)
         {
             var note = await _noteRepository.GetByIdAsync(noteId);
             
-            // Logic quan trọng: Nếu note không tồn tại HOẶC không phải của user này -> Trả về null
-            if (note == null || note.OwnerId != userId) return null;
+            // Không cho phép xem nếu không phải chủ sở hữu, hoặc ghi chú ĐÃ BỊ XÓA (nằm trong thùng rác)
+            if (note == null || note.OwnerId != userId || note.IsDeleted) return null;
 
             return new NoteResponse
             {
@@ -58,7 +57,7 @@ namespace MiniCloudNote.Infrastructure.Services
             };
         }
 
-        // 3. Tạo ghi chú mới
+        // 3. Tạo ghi chú mới (Giữ nguyên)
         public async Task<NoteResponse> CreateNoteAsync(Guid userId, CreateNoteRequest request)
         {
             var newNote = new Note
@@ -66,9 +65,10 @@ namespace MiniCloudNote.Infrastructure.Services
                 Id = Guid.NewGuid(),
                 Title = request.Title,
                 Content = request.Content,
-                OwnerId = userId, // <--- QUAN TRỌNG: Gán chủ sở hữu ở đây
+                OwnerId = userId, 
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false // Mặc định tạo ra là chưa bị xóa
             };
 
             await _noteRepository.AddAsync(newNote);
@@ -88,10 +88,9 @@ namespace MiniCloudNote.Infrastructure.Services
         {
             var note = await _noteRepository.GetByIdAsync(noteId);
             
-            // Kiểm tra quyền sở hữu trước khi sửa
-            if (note == null || note.OwnerId != userId) return false;
+            // Không cho phép sửa ghi chú đang nằm trong thùng rác
+            if (note == null || note.OwnerId != userId || note.IsDeleted) return false;
 
-            // Cập nhật thông tin
             note.Title = request.Title;
             note.Content = request.Content;
             note.UpdatedAt = DateTime.UtcNow;
@@ -100,16 +99,69 @@ namespace MiniCloudNote.Infrastructure.Services
             return true;
         }
 
-        // 5. Xóa ghi chú
+        // 5. Chuyển vào Thùng rác (Soft Delete)
         public async Task<bool> DeleteNoteAsync(Guid noteId, Guid userId)
         {
             var note = await _noteRepository.GetByIdAsync(noteId);
 
-            // Kiểm tra quyền sở hữu trước khi xóa
+            if (note == null || note.OwnerId != userId || note.IsDeleted) return false;
+
+            // ĐÁNH DẤU LÀ ĐÃ XÓA THAY VÌ XÓA THẬT
+            note.IsDeleted = true;
+            note.DeletedAt = DateTime.UtcNow;
+
+            await _noteRepository.UpdateAsync(note); // Update thay vì Delete
+            return true;
+        }
+        // 6. Phục hồi ghi chú từ Thùng rác
+        public async Task<bool> RestoreNoteAsync(Guid noteId, Guid userId)
+        {
+            var note = await _noteRepository.GetByIdAsync(noteId);
+
+            // Phải là ghi chú của mình và đang bị xóa thì mới được phục hồi
+            if (note == null || note.OwnerId != userId || !note.IsDeleted) return false;
+
+            note.IsDeleted = false;
+            note.DeletedAt = null;
+            note.UpdatedAt = DateTime.UtcNow; // Cập nhật lại thời gian sửa
+
+            await _noteRepository.UpdateAsync(note);
+            return true;
+        }
+
+        // 7. Xóa Vĩnh Viễn (Hard Delete) - Dùng khi dọn dẹp thùng rác
+        public async Task<bool> HardDeleteNoteAsync(Guid noteId, Guid userId)
+        {
+            var note = await _noteRepository.GetByIdAsync(noteId);
+
             if (note == null || note.OwnerId != userId) return false;
 
+            // XÓA THẬT KHỎI DATABASE
             await _noteRepository.DeleteAsync(note);
             return true;
+        }
+
+        // 8. Lấy danh sách ghi chú trong Thùng rác
+        public async Task<PagedResult<NoteResponse>> GetTrashNotesAsync(Guid userId, NoteQueryParameters query)
+        {
+            var pagedData = await _noteRepository.GetPagedTrashAsync(userId, query);
+            
+            var noteResponses = pagedData.Items.Select(n => new NoteResponse
+            {
+                Id = n.Id,
+                Title = n.Title,
+                Content = n.Content,
+                CreatedAt = n.CreatedAt,
+                UpdatedAt = n.UpdatedAt
+            });
+
+            return new PagedResult<NoteResponse>
+            {
+                Items = noteResponses,
+                TotalCount = pagedData.TotalCount,
+                PageIndex = pagedData.PageIndex,
+                PageSize = pagedData.PageSize
+            };
         }
     }
 }
