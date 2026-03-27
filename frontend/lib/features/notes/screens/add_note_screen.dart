@@ -4,11 +4,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/notes/models/note_model.dart';
 import 'package:frontend/features/notes/services/note_service.dart';
-import 'package:flutter_markdown/flutter_markdown.dart'; // Dùng để hiển thị Markdown trong phần xem trước (nếu cần)
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class AddNoteScreen extends StatefulWidget {
   final Note? note;
-  final Color? backgroundColor; //Để nhận màu từ HomeScreen truyền sang
+  final Color? backgroundColor;
 
   const AddNoteScreen({super.key, this.note, this.backgroundColor});
 
@@ -21,44 +21,36 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   final TextEditingController _contentController = TextEditingController();
   final NoteService _noteService = NoteService();
   bool _isLoading = false;
-  bool _isUploadingImage = false; // Biến trạng thái khi đang tải ảnh lên MinIO
-  bool _isPreviewMode =
-      false; // Biến trạng thái khi đang ở chế độ Xem trước (Markdown)
+  bool _isUploadingImage = false;
+  bool _isPreviewMode = false;
 
   // --- HÀM CHỌN ẢNH VÀ TẢI LÊN ---
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
-    // Mở Thư viện ảnh của điện thoại
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile == null) return; // Nếu người dùng bấm Hủy thì thôi
+    if (pickedFile == null) return;
 
     setState(() => _isUploadingImage = true);
 
     try {
       File imageFile = File(pickedFile.path);
-
-      // Gọi chuyến xe tải gửi ảnh lên Server (và lấy link về)
       String imageUrl = await _noteService.uploadImage(imageFile);
 
-      // --- CHÈN MARKDOWN VÀO ĐÚNG VỊ TRÍ CON TRỎ CHUỘT ---
       final text = _contentController.text;
       final selection = _contentController.selection;
       final markdownImage = '\n![Hình ảnh]($imageUrl)\n';
 
-      // Nếu con trỏ chuột đang ở một vị trí xác định trong đoạn text
       if (selection.baseOffset >= 0) {
         _contentController.text = text.replaceRange(
           selection.baseOffset,
           selection.extentOffset,
           markdownImage,
         );
-        // Đẩy con trỏ chuột ra phía sau bức ảnh vừa chèn
         _contentController.selection = TextSelection.collapsed(
           offset: selection.baseOffset + markdownImage.length,
         );
       } else {
-        // Nếu không xác định được con trỏ chuột, cứ nhét bừa xuống cuối bài
         _contentController.text += markdownImage;
       }
     } catch (e) {
@@ -80,17 +72,15 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   @override
   void initState() {
     super.initState();
-    // Nếu là chế độ Sửa (Edit), điền sẵn dữ liệu cũ vào ô nhập
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _contentController.text = widget.note!.content;
     }
   }
 
-  // --- HÀM FORMAT NGÀY THÁNG ĐA NGÔN NGỮ ---
   String _getFormattedDate() {
     if (widget.note == null || widget.note!.updatedAt == null) {
-      return 'note_detail.just_now'.tr(); // Ghi chú mới -> Hiện "Vừa xong"
+      return 'note_detail.just_now'.tr();
     }
 
     final date = widget.note!.updatedAt!.toLocal();
@@ -102,7 +92,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     }
   }
 
-  // Hàm Lưu Ghi chú (Gọi Service)
   Future<void> _saveNote() async {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
@@ -120,15 +109,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
     try {
       if (widget.note == null) {
-        // TẠO MỚI
         await _noteService.createNote(title, content);
       } else {
-        // CẬP NHẬT
         await _noteService.updateNote(widget.note!.id!, title, content);
       }
 
       if (mounted) {
-        Navigator.pop(context, true); // Trả về true báo hiệu đã lưu thành công
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -143,60 +130,68 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Nếu có màu được truyền vào (khi Edit) thì dùng màu đó, nếu tạo mới thì mặc định màu trắng
-    final bgColor = widget.backgroundColor ?? Colors.white;
+    // 1. KIỂM TRA TRẠNG THÁI DARK MODE
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // 2. CHỌN MÀU NỀN TỰ ĐỘNG
+    // Nếu chế độ Tối -> Nền đen.
+    // Nếu chế độ Sáng -> Ưu tiên màu Pastel truyền vào, nếu không có thì nền trắng
+    final bgColor = isDarkMode
+        ? Theme.of(context).scaffoldBackgroundColor
+        : (widget.backgroundColor ?? Colors.white);
+
+    // 3. CHỌN MÀU CHỮ & ICON TỰ ĐỘNG
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final hintColor = isDarkMode ? Colors.white30 : Colors.black38;
+    final infoColor = isDarkMode ? Colors.white54 : Colors.black54;
 
     return Scaffold(
-      backgroundColor: bgColor, // <--- PHỦ MÀU LÊN TOÀN MÀN HÌNH
+      backgroundColor: bgColor, // <--- NỀN ĐÃ TRỞ NÊN THÔNG MINH
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // AppBar trong suốt để hòa vào nền
-        elevation: 0, // Xóa đổ bóng của AppBar
-        iconTheme: const IconThemeData(
-          color: Colors.black87,
-        ), // Đổi màu nút Back thành đen
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(
+          color: textColor, // Đổi màu icon góc trái
+        ),
         actions: [
           IconButton(
             icon: Icon(
               _isPreviewMode ? Icons.edit : Icons.remove_red_eye,
               size: 28,
-              color: Colors.black87,
+              color: textColor, // Màu icon con mắt/cây bút
             ),
             tooltip: _isPreviewMode ? 'Chỉnh sửa' : 'Xem trước',
             onPressed: () {
               setState(() {
-                _isPreviewMode = !_isPreviewMode; // Đảo ngược trạng thái
-                // Nếu bật chế độ Xem, tự động thu gọn bàn phím xuống cho dễ nhìn
+                _isPreviewMode = !_isPreviewMode;
                 if (_isPreviewMode) FocusScope.of(context).unfocus();
               });
             },
           ),
-          // 1. NÚT CHỌN ẢNH HOẶC VÒNG XOAY TẢI ẢNH
           if (_isUploadingImage)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Center(
                 child: SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.black87,
+                    color: textColor, // Vòng xoay
                   ),
                 ),
               ),
             )
           else
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.image_outlined,
                 size: 28,
-                color: Colors.black87,
+                color: textColor, // Màu icon tải ảnh
               ),
               tooltip: 'Chèn hình ảnh',
-              onPressed: _pickAndUploadImage, // Gọi hàm chọn ảnh
+              onPressed: _pickAndUploadImage,
             ),
-
-          // 2. NÚT LƯU GHI CHÚ
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -208,11 +203,11 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             )
           else
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.check,
                 size: 30,
-                color: Colors.black87,
-              ), // Nút Lưu hình dấu Tích
+                color: textColor, // Màu icon dấu tích
+              ),
               tooltip: 'Lưu ghi chú',
               onPressed: _saveNote,
             ),
@@ -222,18 +217,18 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           children: [
-            // Ô NHẬP TIÊU ĐỀ (Chữ to, in đậm, không viền)
+            // Ô NHẬP TIÊU ĐỀ
             TextField(
               controller: _titleController,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: textColor, // Màu tiêu đề
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Tiêu đề',
-                hintStyle: TextStyle(color: Colors.black38),
-                border: InputBorder.none, // <--- XÓA ĐƯỜNG GẠCH CHÂN
+                hintStyle: TextStyle(color: hintColor),
+                border: InputBorder.none,
               ),
             ),
             const SizedBox(height: 5),
@@ -241,29 +236,23 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             // --- THANH THÔNG TIN (NGÀY + SỐ KÝ TỰ) ---
             Row(
               children: [
-                // Ngày chỉnh sửa
                 Text(
                   _getFormattedDate(),
-                  style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  style: TextStyle(color: infoColor, fontSize: 13),
                 ),
-                // Dấu gạch dọc ngăn cách
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                     '|',
-                    style: TextStyle(color: Colors.black54, fontSize: 13),
+                    style: TextStyle(color: infoColor, fontSize: 13),
                   ),
                 ),
-                // Đếm số ký tự Real-time bằng ValueListenableBuilder
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _contentController,
                   builder: (context, value, child) {
                     return Text(
                       '${value.text.length} ${'note_detail.chars'.tr()}',
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: infoColor, fontSize: 13),
                     );
                   },
                 ),
@@ -275,35 +264,32 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             // Ô NHẬP NỘI DUNG (Hoặc hiển thị Markdown)
             Expanded(
               child: _isPreviewMode
-                  ? // NẾU ĐANG BẬT MẮT XEM TRƯỚC -> GỌI THƯ VIỆN MARKDOWN ĐỂ VẼ ẢNH
-                    Markdown(
+                  ? Markdown(
                       data: _contentController.text.isEmpty
                           ? '*Chưa có nội dung...*'
                           : _contentController.text,
                       styleSheet: MarkdownStyleSheet(
-                        p: const TextStyle(
+                        p: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: textColor, // Đổi màu chữ hiển thị Markdown
                           height: 1.5,
                         ),
                       ),
                     )
-                  : // NẾU ĐANG CHỈNH SỬA -> HIỂN THỊ Ô TEXTFIELD BÌNH THƯỜNG
-                    TextField(
+                  : TextField(
                       controller: _contentController,
-                      maxLines: null, // <--- Cho phép gõ xuống dòng vô hạn
-                      expands: true, // <--- Kéo giãn ô nhập phủ kín màn hình
-                      textAlignVertical: TextAlignVertical
-                          .top, // Con trỏ chuột bắt đầu từ trên cùng
-                      style: const TextStyle(
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      style: TextStyle(
                         fontSize: 18,
-                        color: Colors.black87,
+                        color: textColor, // Đổi màu chữ khi đang gõ
                         height: 1.5,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Nhập nội dung ghi chú của bạn...',
-                        hintStyle: TextStyle(color: Colors.black38),
-                        border: InputBorder.none, // <--- XÓA ĐƯỜNG GẠCH CHÂN
+                        hintStyle: TextStyle(color: hintColor),
+                        border: InputBorder.none,
                       ),
                     ),
             ),

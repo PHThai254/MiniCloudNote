@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/features/auth/screens/login_screen.dart';
 import 'package:frontend/features/notes/screens/home_screen.dart';
 
+// TẠO BIẾN TOÀN CỤC ĐỂ QUẢN LÝ THEME (Sáng/Tối)
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 void main() async {
   // Bắt buộc phải có dòng này để Flutter khởi tạo các dịch vụ ngầm (như bộ nhớ máy) trước khi chạy UI
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +13,13 @@ void main() async {
   // Đánh thức "Trí nhớ siêu phàm" của Easy Localization
   await EasyLocalization.ensureInitialized();
 
+  // MỞ KÉT SẮT KIỂM TRA XEM LẦN TRƯỚC DÙNG THEME GÌ
+  const storage = FlutterSecureStorage();
+  String? savedTheme = await storage.read(key: 'app_theme');
+  if (savedTheme == 'dark') {
+    themeNotifier.value =
+        ThemeMode.dark; // Nếu trước đó là Dark thì set là Dark
+  }
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
@@ -42,42 +51,70 @@ class MiniCloudNoteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MiniCloudNote',
+    // 3. BAO BỌC APP BẰNG VALUELISTENABLEBUILDER ĐỂ LẮNG NGHE SỰ THAY ĐỔI
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentMode, child) {
+        return MaterialApp(
+          title: 'MiniCloudNote',
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          debugShowCheckedModeBanner: false,
 
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
+          // 4. CẤU HÌNH GIAO DIỆN SÁNG VÀ TỐI
+          themeMode: currentMode, // <--- Nhận lệnh Sáng/Tối từ Notifier
+          // Giao diện Sáng (Mặc định)
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
+            ),
+            useMaterial3: true,
+            scaffoldBackgroundColor: Colors.grey[100],
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.grey[100],
+              foregroundColor: Colors.black87,
+            ),
+          ),
 
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      // Dùng FutureBuilder để quyết định "Trạm đến" đầu tiên
-      home: FutureBuilder<bool>(
-        future: _checkLoginStatus(),
-        builder: (context, snapshot) {
-          // Trạng thái 1: Đang chờ mở két sắt
-          // Hiển thị vòng xoay loading ở chính giữa màn hình
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(color: Colors.deepPurple),
-              ),
-            );
-          }
+          // Giao diện Tối (Dark Mode) - ĐÃ ĐƯỢC NÂNG CẤP ĐỂ SỬA LỖI Ô NHẬP VĂN BẢN
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+            scaffoldBackgroundColor: const Color(
+              0xFF121212,
+            ), // Nền đen chuẩn Material cho toàn app
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF121212),
+              foregroundColor: Colors.white,
+            ),
+            cardColor: const Color(0xFF1E1E1E),
+            // ---------------------------------------------------------------------------------
+          ),
 
-          // Trạng thái 2: Mở két xong. Kiểm tra dữ liệu
-          // Nếu có lỗi lúc đọc két, HOẶC dữ liệu trả về là false (không có token)
-          if (snapshot.hasError || !(snapshot.data ?? false)) {
-            return const LoginScreen(); // Bắt đi đăng nhập
-          }
-
-          // Trạng thái 3: Két có chứa Token -> Khách quen!
-          return const HomeScreen(); // Cho vào thẳng nhà
-        },
-      ),
+          home: FutureBuilder<bool>(
+            future: _checkLoginStatus(),
+            // ... (Phần builder của FutureBuilder giữ nguyên y hệt của bạn)
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(color: Colors.deepPurple),
+                  ),
+                );
+              }
+              if (snapshot.hasError || !(snapshot.data ?? false)) {
+                return const LoginScreen();
+              }
+              return const HomeScreen();
+            },
+          ),
+        );
+      },
     );
   }
 }

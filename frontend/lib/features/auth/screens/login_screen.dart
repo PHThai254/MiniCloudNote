@@ -27,8 +27,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Kỹ thuật bắt trạng thái Theme hiện tại (Sáng hay Tối)
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Các biến màu sắc tự động thay đổi theo Theme
+    final bgColor = isDarkMode
+        ? Theme.of(context).scaffoldBackgroundColor
+        : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.white70 : Colors.grey;
+    final textFieldColor = isDarkMode ? Colors.grey[900] : Colors.grey[50];
+    final borderColor = isDarkMode ? Colors.grey[800] : Colors.grey.shade300;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor, // <-- Dùng màu linh hoạt
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
@@ -36,29 +48,25 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              // --- Header có gắn nút Quả cầu ---
+              // --- Header ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'login.title'.tr(), // Đã dịch
-                    style: const TextStyle(
+                    'login.title'.tr(),
+                    style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: textColor, // <-- Màu chữ tự động chỉnh sửa
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.language, color: Colors.deepPurple),
                     onPressed: () {
                       if (context.locale.languageCode == 'vi') {
-                        context.setLocale(
-                          const Locale('en', 'US'),
-                        ); // Đã thêm 'US'
+                        context.setLocale(const Locale('en', 'US'));
                       } else {
-                        context.setLocale(
-                          const Locale('vi', 'VN'),
-                        ); // Đã thêm 'VN'
+                        context.setLocale(const Locale('vi', 'VN'));
                       }
                     },
                   ),
@@ -66,39 +74,46 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'login.subtitle'.tr(), // Đã dịch
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
+                'login.subtitle'.tr(),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: subtitleColor,
+                ), // <-- Đã sửa
               ),
               const SizedBox(height: 50),
 
               // --- Email Input ---
               Text(
                 'login.email_label'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                style: TextStyle(color: textColor), // <-- Ép màu chữ khi gõ
                 decoration: InputDecoration(
-                  hintText: 'login.email_hint'.tr(), // Đã dịch
-                  hintStyle: const TextStyle(color: Colors.black38),
+                  hintText: 'login.email_hint'.tr(),
+                  hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ), // <-- Đã sửa
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: textFieldColor, // <-- Đã sửa
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor!), // <-- Đã sửa
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -114,20 +129,24 @@ class _LoginScreenState extends State<LoginScreen> {
               // --- Password Input ---
               Text(
                 'login.password_label'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
+                style: TextStyle(color: textColor), // <-- Ép màu chữ khi gõ
                 decoration: InputDecoration(
                   hintText: 'login.password_hint'.tr(),
-                  hintStyle: const TextStyle(color: Colors.black38),
+                  hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ), // <-- Đã sửa
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: textFieldColor, // <-- Đã sửa
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
@@ -137,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: Colors.grey,
+                      color: subtitleColor, // <-- Đã sửa
                     ),
                     onPressed: () {
                       setState(() {
@@ -147,11 +166,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -186,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // --- Login Button ---
+              // --- Login Button (Giữ nguyên logic của bạn) ---
               ElevatedButton(
                 onPressed: _isLoading
                     ? null
@@ -210,7 +229,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
 
                         try {
-                          // Bắt kết quả trả về từ Service (null nếu thành công, hoặc là một Mã Lỗi)
                           final errorCode = await AuthService().loginUser(
                             email,
                             password,
@@ -218,7 +236,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           if (!context.mounted) return;
 
-                          // Nếu errorCode là null -> Đăng nhập thành công!
                           if (errorCode == null) {
                             Navigator.pushReplacement(
                               context,
@@ -226,13 +243,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (context) => const HomeScreen(),
                               ),
                             );
-                          }
-                          // Nếu có lỗi -> Lấy mã lỗi, dịch và hiện lên màn hình
-                          else {
+                          } else {
                             String translationKey = 'errors.$errorCode';
                             String localizedMessage = translationKey.tr();
 
-                            // Nếu không tìm thấy bản dịch, hiện lỗi mặc định
                             if (localizedMessage == translationKey) {
                               localizedMessage = 'errors.UNKNOWN_ERROR'.tr();
                             }
@@ -290,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     '${'login.no_account'.tr()} ',
-                    style: const TextStyle(color: Colors.grey),
+                    style: TextStyle(color: subtitleColor), // <-- Đã sửa
                   ),
                   TextButton(
                     onPressed: () {

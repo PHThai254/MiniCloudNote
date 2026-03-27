@@ -1,4 +1,4 @@
-import 'package:easy_localization/easy_localization.dart'; // ĐÃ THÊM ĐỂ DỊCH
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/features/auth/services/auth_service.dart';
 
@@ -26,8 +26,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Kỹ thuật bắt trạng thái Theme hiện tại
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Các biến màu sắc linh hoạt
+    final bgColor = isDarkMode
+        ? Theme.of(context).scaffoldBackgroundColor
+        : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.white70 : Colors.grey;
+    final textFieldColor = isDarkMode ? Colors.grey[900] : Colors.grey[50];
+    final borderColor = isDarkMode ? Colors.grey[800] : Colors.grey.shade300;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor, // <-- Dùng màu linh hoạt
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
@@ -45,14 +57,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Container(
                       padding: const EdgeInsets.only(bottom: 16, right: 30),
                       color: Colors.transparent,
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back_ios_new,
-                        color: Colors.black87,
+                        color: textColor, // <-- Màu linh hoạt cho icon back
                         size: 28,
                       ),
                     ),
                   ),
-                  // Nút Quả Cầu
                   IconButton(
                     icon: const Icon(Icons.language, color: Colors.deepPurple),
                     onPressed: () {
@@ -67,47 +78,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
 
               Text(
-                'register.title'.tr(), // Đã dịch
-                style: const TextStyle(
+                'register.title'.tr(),
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'register.subtitle'.tr(), // Đã dịch
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
+                'register.subtitle'.tr(),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: subtitleColor,
+                ), // <-- Đã sửa
               ),
               const SizedBox(height: 40),
 
               // --- Full Name Input ---
               Text(
-                'register.fullname_label'.tr(), // Đã dịch
-                style: const TextStyle(
+                'register.fullname_label'.tr(),
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
+                style: TextStyle(color: textColor), // <-- Ép màu chữ
                 decoration: InputDecoration(
-                  hintText: 'register.fullname_hint'.tr(), // Đã dịch
-                  hintStyle: const TextStyle(color: Colors.black38),
+                  hintText: 'register.fullname_hint'.tr(),
+                  hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ), // <-- Đã sửa
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: textFieldColor, // <-- Đã sửa
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor!), // <-- Đã sửa
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -122,32 +140,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               // --- Email Input ---
               Text(
-                'register.email_label'.tr(), // Đã dịch
-                style: const TextStyle(
+                'register.email_label'.tr(),
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                style: TextStyle(color: textColor), // <-- Ép màu chữ
                 decoration: InputDecoration(
-                  hintText: 'register.email_hint'.tr(), // Đã dịch
-                  hintStyle: const TextStyle(color: Colors.black38),
+                  hintText: 'register.email_hint'.tr(),
+                  hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ), // <-- Đã sửa
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: textFieldColor, // <-- Đã sửa
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -162,32 +184,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               // --- Password Input ---
               Text(
-                'register.password_label'.tr(), // Đã dịch
-                style: const TextStyle(
+                'register.password_label'.tr(),
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // <-- Đã sửa
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
+                style: TextStyle(color: textColor), // <-- Ép màu chữ
                 decoration: InputDecoration(
-                  hintText: 'register.password_hint'.tr(), // Đã dịch
-                  hintStyle: const TextStyle(color: Colors.black38),
+                  hintText: 'register.password_hint'.tr(),
+                  hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ), // <-- Đã sửa
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: textFieldColor, // <-- Đã sửa
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 16,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: borderColor), // <-- Đã sửa
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -200,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 40),
 
-              // --- Register Button ---
+              // --- Register Button (Logic giữ nguyên) ---
               ElevatedButton(
                 onPressed: _isLoading
                     ? null
@@ -210,13 +236,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         final generatedUsername = email.split('@')[0];
                         final password = _passwordController.text;
 
-                        // KIỂM TRA RỖNG
                         if (name.isEmpty || email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                'register.error_empty'.tr(),
-                              ), // Đã dịch
+                              content: Text('register.error_empty'.tr()),
                               backgroundColor: Colors.red,
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -229,7 +252,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
 
                         try {
-                          // GỌI API ĐĂNG KÝ
                           final errorCode = await AuthService().registerUser(
                             generatedUsername,
                             name,
@@ -239,21 +261,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           if (!context.mounted) return;
 
-                          // THÀNH CÔNG (errorCode là null)
                           if (errorCode == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  'register.success_msg'.tr(),
-                                ), // Đã dịch
+                                content: Text('register.success_msg'.tr()),
                                 backgroundColor: Colors.green,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
-                            Navigator.pop(context); // Đá về trang Login
-                          }
-                          // THẤT BẠI (Có errorCode)
-                          else {
+                            Navigator.pop(context);
+                          } else {
                             String translationKey = 'errors.$errorCode';
                             String localizedMessage = translationKey.tr();
 
@@ -296,7 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       )
                     : Text(
-                        'register.submit_btn'.tr(), // Đã dịch
+                        'register.submit_btn'.tr(),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
