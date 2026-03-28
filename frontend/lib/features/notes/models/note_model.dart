@@ -3,7 +3,8 @@ class Note {
   final String title;
   final String content;
   final DateTime? createdAt;
-  final DateTime? updatedAt; // THÊM DÒNG NÀY: Ngày chỉnh sửa gần nhất
+  final DateTime? updatedAt; // Ngày chỉnh sửa gần nhất
+  final bool isPinned;
 
   Note({
     this.id,
@@ -11,6 +12,7 @@ class Note {
     required this.content,
     this.createdAt,
     this.updatedAt,
+    this.isPinned = false,
   });
 
   // --- HÀM 1: Nhận hàng từ C# (Từ JSON -> Dart Object) ---
@@ -31,6 +33,7 @@ class Note {
           : (json['createdAt'] != null
                 ? DateTime.parse(json['createdAt'])
                 : null),
+      isPinned: json['isPinned'] ?? false, // ĐỌC DỮ LIỆU TỪ JSON C# GỬI VỀ
     );
   }
 
@@ -43,6 +46,7 @@ class Note {
       // Khi gửi lên C# thường gửi dạng chuỗi ISO 8601
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isPinned': isPinned, // GÓI VÀO JSON NẾU CẦN
     };
   }
 }

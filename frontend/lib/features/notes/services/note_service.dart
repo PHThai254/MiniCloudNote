@@ -374,4 +374,32 @@ class NoteService {
       throw Exception('Không thể xóa vĩnh viễn: $e');
     }
   }
+
+  // --- Hàm Ghim / Bỏ ghim Ghi chú ---
+  Future<bool> togglePinNote(String id) async {
+    try {
+      debugPrint('Đang yêu cầu Đảo trạng thái Ghim Ghi chú ID: $id...');
+
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null || token.isEmpty) throw Exception('Chưa đăng nhập!');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/$id/pin'), // Gọi API: PUT /api/Notes/{id}/pin
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Đã thay đổi trạng thái Ghim thành công!');
+        return true;
+      } else {
+        throw Exception('Lỗi Server: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Lỗi NoteService (togglePinNote): $e');
+      throw Exception('Không thể ghim ghi chú: $e');
+    }
+  }
 }

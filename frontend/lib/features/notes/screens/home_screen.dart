@@ -236,8 +236,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Dismissible(
                 key: Key(note.id ?? index.toString()),
-                direction: DismissDirection.endToStart,
+
+                // 1. ĐÃ ĐỔI: Cho phép vuốt cả 2 chiều (Ngang)
+                direction: DismissDirection.horizontal,
+
+                // 2. MÀN HÌNH NỀN KHI VUỐT SANG PHẢI (GHIM / BỎ GHIM)
                 background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 20.0),
+                  decoration: BoxDecoration(
+                    color: note.isPinned
+                        ? Colors.orange.shade400
+                        : Colors
+                              .green
+                              .shade400, // Đang ghim thì hiện màu cam, chưa ghim thì xanh
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Icon(
+                    note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+
+                // 3. MÀN HÌNH NỀN KHI VUỐT SANG TRÁI (XÓA MỀM - Giữ nguyên của bạn)
+                secondaryBackground: Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20.0),
                   decoration: BoxDecoration(
@@ -251,7 +275,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     size: 30,
                   ),
                 ),
+
+                // 4. XỬ LÝ HÀNH ĐỘNG SAU KHI VUỐT
                 confirmDismiss: (direction) async {
+                  // NẾU VUỐT SANG PHẢI -> GỌI API GHIM
+                  if (direction == DismissDirection.startToEnd) {
+                    if (note.id != null) {
+                      try {
+                        await NoteService().togglePinNote(note.id!);
+                        _loadNotes(); // Tải lại danh sách để nó tự động nhảy lên đầu
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+                        }
+                      }
+                    }
+                    // TRẢ VỀ FALSE ĐỂ THẺ KHÔNG BỊ BAY BIẾN MẤT (Chỉ nảy lại vị trí cũ)
+                    return false;
+                  }
+
+                  // NẾU VUỐT SANG TRÁI -> HỎI XÓA NHƯ CŨ
                   return await showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -286,10 +331,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   );
                 },
+
+                // 5. NẾU XÁC NHẬN XÓA (Vuốt trái) THÌ GỌI API XÓA
                 onDismissed: (direction) async {
-                  if (note.id != null) {
+                  if (direction == DismissDirection.endToStart &&
+                      note.id != null) {
                     try {
                       await NoteService().deleteNote(note.id!);
+
+                      // ---> BẮT BUỘC PHẢI THÊM DÒNG NÀY <---
+                      // Để làm mới lại danh sách sau khi xóa, tránh bị lệch vị trí thẻ (Index)
+                      _loadNotes();
+
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -298,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
                     } catch (e) {
-                      _loadNotes();
+                      _loadNotes(); // Lỗi cũng load lại để phục hồi thẻ
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -310,30 +363,51 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   }
                 },
+
+                // 6. THẺ GHI CHÚ
                 child: Card(
                   color: noteColor,
-                  elevation: 2,
+                  elevation: note.isPinned
+                      ? 4
+                      : 2, // Nếu ghim thì thẻ nổi bóng đậm hơn xíu
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
+                    // Thêm viền nhẹ nếu đang được ghim
+                    side: note.isPinned
+                        ? BorderSide(
+                            color: Colors.deepPurple.withValues(alpha: 0.5),
+                            width: 1.5,
+                          )
+                        : BorderSide.none,
                   ),
                   child: ListTile(
-                    title: Text(
-                      note.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors
-                            .black87, // ĐÃ FIX: Ép màu đen để tránh bị chìm vào nền Pastel khi ở chế độ Dark Mode
-                      ),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            note.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        // ĐÃ THÊM: ICON GHIM NHỎ BÊN CẠNH TIÊU ĐỀ
+                        if (note.isPinned)
+                          const Icon(
+                            Icons.push_pin,
+                            size: 18,
+                            color: Colors.deepPurple,
+                          ),
+                      ],
                     ),
                     subtitle: Text(
                       note.content,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                      ), // ĐÃ FIX: Ép màu xám đậm
+                      style: const TextStyle(color: Colors.black54),
                     ),
                     trailing: const Icon(
                       Icons.chevron_right,
