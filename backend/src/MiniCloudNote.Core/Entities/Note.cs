@@ -22,8 +22,9 @@ namespace MiniCloudNote.Core.Entities
         // --- 2 DÒNG NÀY CHO TÍNH NĂNG THÙNG RÁC ---
         public bool IsDeleted { get; set; } = false; // false = Bình thường, true = Đã vào thùng rác
         public DateTime? DeletedAt { get; set; } // Lưu lại thời điểm bị ném vào thùng rác
-        // -----------------------------------------------
 
+        public bool IsPinned { get; set; } = false; // Mặc định tạo ra là không ghim
+        
         // Khóa ngoại lưu ID của user tạo ghi chú
         public Guid OwnerId { get; set; }
 

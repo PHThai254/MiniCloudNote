@@ -48,48 +48,11 @@ namespace MiniCloudNote.API.Controllers
         public async Task<IActionResult> GetMyNotes([FromQuery] NoteQueryParameters query)
         {
             var userId = GetUserId();
-            // TẠO CACHE KEY ĐỘC NHẤT
-            // Key phải bao gồm UserID + Page + Search + Sort để tránh nhầm lẫn giữa các trang
-            // Ví dụ key: "notes:guid-123:search-abc:sort-date:p-1:s-10"
-            string cacheKey = $"note:{userId}:{query.SearchTerm}:{query.SortBy}:{query.PageIndex}:{query.PageSize}";
-            // KIỂM TRA REDIS
-            try
-            {
-                var cachedData = await _cache.GetAsync(cacheKey);
-                if (cachedData != null)
-                {
-                    // HIT CACHE: Có dữ liệu trong RAM -> Trả về luôn (Siêu nhanh)
-                    var jsonString = Encoding.UTF8.GetString(cachedData);
-
-                    // Lưu ý: Deserialize đúng kiểu dữ liệu trả về của Service (thường là IEnumerable<NoteDto> hoặc PagedResult)
-                    var cachedNotes = JsonSerializer.Deserialize<IEnumerable<NoteResponse>>(jsonString);
-                    return Ok(cachedNotes);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Nếu Redis chết, log lỗi nhưng KHÔNG ĐƯỢC làm sập App
-                // Vẫn cho chạy tiếp xuống DB để lấy dữ liệu (Fallback)
-                Console.WriteLine($"--> Redis Error: {ex.Message}");
-            }
-
-            // MISS CACHE -> GỌI DATABASE
+            
+            // TẮT REDIS CACHE: Luôn gọi thẳng xuống DB để lấy dữ liệu tươi mới nhất, 
+            // tránh tình trạng "bóng ma" khi vuốt Xóa/Ghim liên tục.
             var notes = await _noteService.GetUserNotesAsync(userId, query);
 
-            // LƯU VÀO REDIS (SỐNG 60 GIÂY)
-            try
-            {
-                var cacheOptions = new DistributedCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(60)) // Hết hạn cứng sau 60s
-                    .SetSlidingExpiration(TimeSpan.FromSeconds(30)); // Nếu có người xem liên tục thì gia hạn thêm 30s
-
-                var jsonToCache = JsonSerializer.Serialize(notes);
-                await _cache.SetAsync(cacheKey, Encoding.UTF8.GetBytes(jsonToCache), cacheOptions);
-            }
-            catch
-            {
-                // Lỗi lưu cache thì bỏ qua
-            }
             return Ok(notes);
         }
 
@@ -257,6 +220,20 @@ namespace MiniCloudNote.API.Controllers
                 return StatusCode(500, $"Lỗi lấy link ảnh: {ex.Message}");
             }
         }
+
+        // Ghim / Bỏ ghim ghi chú
+        // PUT: api/Notes/{id}/pin
+        [HttpPut("{id}/pin")]
+        public async Task<IActionResult> TogglePin(Guid id)
+        {
+            var userId = GetUserId();
+            var isToggled = await _noteService.TogglePinNoteAsync(id, userId);
+
+            if (!isToggled) return NotFound(new { message = "Không tìm thấy ghi chú." });
+
+            return Ok(new { message = "Đã thay đổi trạng thái ghim!" });
+        }
+
     }
     // Class dùng để hứng dữ liệu upload
     public class UploadFileRequest

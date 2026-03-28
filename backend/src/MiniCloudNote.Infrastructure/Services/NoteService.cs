@@ -27,7 +27,8 @@ namespace MiniCloudNote.Infrastructure.Services
                 Title = n.Title,
                 Content = n.Content,
                 CreatedAt = n.CreatedAt,
-                UpdatedAt = n.UpdatedAt
+                UpdatedAt = n.UpdatedAt,
+                IsPinned = n.IsPinned
             });
 
             return new PagedResult<NoteResponse>
@@ -53,7 +54,8 @@ namespace MiniCloudNote.Infrastructure.Services
                 Title = note.Title,
                 Content = note.Content,
                 CreatedAt = note.CreatedAt,
-                UpdatedAt = note.UpdatedAt
+                UpdatedAt = note.UpdatedAt,
+                IsPinned = note.IsPinned
             };
         }
 
@@ -162,6 +164,21 @@ namespace MiniCloudNote.Infrastructure.Services
                 PageIndex = pagedData.PageIndex,
                 PageSize = pagedData.PageSize
             };
+        }
+
+        // 9. Đảo trạng thái Ghim / Bỏ ghim
+        public async Task<bool> TogglePinNoteAsync(Guid noteId, Guid userId)
+        {
+            var note = await _noteRepository.GetByIdAsync(noteId);
+            
+            // Không cho ghim nếu không tìm thấy, không phải chủ, hoặc đang trong thùng rác
+            if (note == null || note.OwnerId != userId || note.IsDeleted) return false;
+
+            note.IsPinned = !note.IsPinned; // Đang true thì thành false, đang false thì thành true
+            note.UpdatedAt = DateTime.UtcNow;
+
+            await _noteRepository.UpdateAsync(note);
+            return true;
         }
     }
 }

@@ -47,14 +47,13 @@ namespace MiniCloudNote.Infrastructure.Repositories
                 // Tìm trong Title Hoặc Content (chứa từ khóa)
                 queryable = queryable.Where(n => n.Title.ToLower().Contains(term));
             }
-            // BƯỚC 3: Sắp xếp (Sorting)
-            // switch expression (C# 8.0+)
+            // BƯỚC 3: Sắp xếp (Sorting) - ĐÃ NÂNG CẤP TÍNH NĂNG GHIM
             queryable = query.SortBy switch
             {
-                "title_asc" => queryable.OrderBy(n => n.Title),
-                "title_desc" => queryable.OrderByDescending(n => n.Title),
-                "created_asc" => queryable.OrderBy(n => n.CreatedAt),
-                _ => queryable.OrderByDescending(n => n.CreatedAt) // Mặc định: Mới nhất lên đầu
+                "title_asc" => queryable.OrderByDescending(n => n.IsPinned).ThenBy(n => n.Title),
+                "title_desc" => queryable.OrderByDescending(n => n.IsPinned).ThenByDescending(n => n.Title),
+                "created_asc" => queryable.OrderByDescending(n => n.IsPinned).ThenBy(n => n.CreatedAt),
+                _ => queryable.OrderByDescending(n => n.IsPinned).ThenByDescending(n => n.CreatedAt) 
             };
 
             // BƯỚC 4: Đếm tổng số bản ghi (Total Count)

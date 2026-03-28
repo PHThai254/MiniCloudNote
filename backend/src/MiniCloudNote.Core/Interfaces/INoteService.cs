@@ -28,5 +28,8 @@ namespace MiniCloudNote.Core.Interfaces
         // Xóa vĩnh viễn (Hard Delete)
         Task<bool> HardDeleteNoteAsync(Guid noteId, Guid userId);
 
+        // Đảo trạng thái ghim
+        Task<bool> TogglePinNoteAsync(Guid noteId, Guid userId);
+
     }
 }
